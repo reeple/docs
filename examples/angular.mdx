@@ -1,0 +1,62 @@
+---
+title: Angular
+description: Wrap the Reeple SDK in an injectable service
+---
+
+Wrap the plain `Reeple` class in an injectable service so it can be reused across components.
+
+```bash
+npm install @reeple/sdk
+```
+
+```typescript reeple.service.ts
+import { Injectable } from '@angular/core';
+import { Reeple, ReepleConfig } from '@reeple/sdk';
+
+@Injectable({ providedIn: 'root' })
+export class ReepleService {
+  private instance: Reeple | null = null;
+
+  open(config: ReepleConfig): void {
+    this.instance = new Reeple(config);
+    this.instance.open();
+  }
+
+  close(): void {
+    this.instance?.close();
+  }
+}
+```
+
+```typescript checkout.component.ts
+import { Component } from '@angular/core';
+import { ReepleService } from './reeple.service';
+
+@Component({
+  selector: 'app-checkout',
+  template: `<button (click)="pay()">Pay Now</button>`,
+})
+export class CheckoutComponent {
+  constructor(private reepleService: ReepleService) {}
+
+  pay(): void {
+    this.reepleService.open({
+      publicKey: 'pk_live_your_key_here',
+      amount: 5000,
+      currency: 'NGN',
+      narration: 'Order #1234',
+      customer: {
+        email: 'customer@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '+2348012345678',
+      },
+      meta: {},
+      callbackUrl: 'https://yoursite.com/payment/callback',
+      onSuccess: (data) => console.log('Payment successful', data),
+      onClose: () => console.log('Modal closed'),
+      onError: (err) => console.error('Payment error', err),
+    });
+  }
+}
+```

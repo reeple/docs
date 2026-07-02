@@ -1,0 +1,54 @@
+---
+title: Configuration
+description: Full reference for ReepleConfig fields, callbacks, and methods
+---
+
+All options are passed to the `Reeple` constructor as a single `ReepleConfig` object.
+
+## Required fields
+
+| Field | Type | Description |
+|---|---|---|
+| `publicKey` | `string` | Your Reeple public key (issued by Payshiga) |
+| `amount` | `number` | Payment amount in the smallest currency unit (kobo for NGN, cents for USD, etc.) |
+| `currency` | `Currency` | Currency code. See [supported currencies](/currencies) |
+| `narration` | `string` | Short description of the payment shown on the checkout page |
+| `customer.email` | `string` | Customer's email address |
+| `customer.firstName` | `string` | Customer's first name |
+| `customer.lastName` | `string` | Customer's last name |
+| `customer.phoneNumber` | `string` | Customer's phone number (include country code, e.g. `+2348012345678`) |
+| `meta` | `object` | Arbitrary key-value data attached to the transaction. Pass `{}` if you have nothing to add |
+
+<Note>
+  `amount` is always in the smallest unit of the currency — e.g. `5000` for NGN means ₦50.00 (kobo), and `5000` for USD means $50.00 (cents). See [Supported Currencies](/currencies) for more examples.
+</Note>
+
+## Optional fields
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `callbackUrl` | `string` | — | URL Payshiga redirects to after payment. Required if you want `onSuccess` to fire in the browser |
+| `reference` | `string` | auto-generated | Your unique transaction reference. SDK generates one if omitted |
+| `mode` | `'sandbox' \| 'production'` | `'production'` | Use `'sandbox'` for testing — see [Sandbox / Testing](/sandbox-testing) |
+
+## Callbacks
+
+| Callback | Signature | Fires when |
+|---|---|---|
+| `onSuccess` | `(data: ReepleSuccessData) => void` | Payment completes and the iframe reaches the callback URL |
+| `onClose` | `() => void` | User closes the modal without completing payment |
+| `onError` | `(error: Error) => void` | API call fails, network error, or session times out (10 min) |
+| `onLoad` | `() => void` | The payment iframe finishes loading |
+
+For the full `ReepleSuccessData` shape and how to verify a payment server-side, see [Callbacks & Verification](/callbacks-and-verification).
+
+## Methods
+
+```javascript
+reeple.open();   // Initiates the API call and opens the payment modal
+reeple.close();  // Programmatically closes the modal (fires onClose)
+```
+
+<Note>
+  Calling `open()` while the modal is already open is a no-op.
+</Note>

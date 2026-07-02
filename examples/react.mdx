@@ -1,0 +1,61 @@
+---
+title: React
+description: Wrap the Reeple SDK in a reusable hook
+---
+
+There's no separate `@reeple/react` package — `@reeple/sdk` is a plain class, so the idiomatic way to use it in React is a small custom hook.
+
+```bash
+npm install @reeple/sdk
+```
+
+```tsx useReeple.ts
+import { useCallback, useRef } from 'react';
+import { Reeple, ReepleConfig } from '@reeple/sdk';
+
+export function useReeple(config: ReepleConfig) {
+  const reepleRef = useRef<Reeple | null>(null);
+
+  const open = useCallback(() => {
+    // Recreated on each call so the latest config/callbacks are always used
+    reepleRef.current = new Reeple(config);
+    reepleRef.current.open();
+  }, [config]);
+
+  const close = useCallback(() => {
+    reepleRef.current?.close();
+  }, []);
+
+  return { open, close };
+}
+```
+
+```tsx CheckoutButton.tsx
+import { useReeple } from './useReeple';
+
+export function CheckoutButton() {
+  const { open } = useReeple({
+    publicKey: 'pk_live_your_key_here',
+    amount: 5000,
+    currency: 'NGN',
+    narration: 'Order #1234',
+    customer: {
+      email: 'customer@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      phoneNumber: '+2348012345678',
+    },
+    meta: {},
+    callbackUrl: 'https://yoursite.com/payment/callback',
+    onSuccess: (data) => console.log('Payment successful', data),
+    onClose: () => console.log('Modal closed'),
+    onError: (err) => console.error('Payment error', err),
+  });
+
+  return <button onClick={open}>Pay Now</button>;
+}
+```
+
+<Note>
+  `Reeple` reads and writes the DOM, so it only works in the browser. If you're on Next.js, see the [Next.js example](/examples/nextjs) for the client-only setup this requires.
+</Note>

@@ -1,0 +1,44 @@
+---
+title: Svelte
+description: Using the Reeple SDK in a Svelte component
+---
+
+Instantiate the plain `Reeple` class from `@reeple/sdk` directly inside a component — no wrapper needed.
+
+```bash
+npm install @reeple/sdk
+```
+
+```svelte CheckoutButton.svelte
+<script lang="ts">
+  import { Reeple } from '@reeple/sdk';
+
+  function pay() {
+    const reeple = new Reeple({
+      publicKey: 'pk_live_your_key_here',
+      amount: 5000,
+      currency: 'NGN',
+      narration: 'Order #1234',
+      customer: {
+        email: 'customer@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '+2348012345678',
+      },
+      meta: {},
+      callbackUrl: 'https://yoursite.com/payment/callback',
+      onSuccess: (data) => console.log('Payment successful', data),
+      onClose: () => console.log('Modal closed'),
+      onError: (err) => console.error('Payment error', err),
+    });
+
+    reeple.open();
+  }
+</script>
+
+<button on:click={pay}>Pay Now</button>
+```
+
+<Note>
+  If you're using SvelteKit with SSR enabled, only instantiate `Reeple` inside an event handler (as shown above) or inside `onMount` — never at module scope — since it touches the DOM and isn't available during server rendering.
+</Note>

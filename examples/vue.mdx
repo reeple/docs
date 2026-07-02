@@ -1,0 +1,47 @@
+---
+title: Vue
+description: Using the Reeple SDK with Vue's Composition API
+---
+
+There's no separate `@reeple/vue` package — instantiate the plain `Reeple` class from `@reeple/sdk` inside a component using the Composition API.
+
+```bash
+npm install @reeple/sdk
+```
+
+```vue CheckoutButton.vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import { Reeple } from '@reeple/sdk';
+
+const reeple = ref<Reeple | null>(null);
+
+function pay() {
+  reeple.value = new Reeple({
+    publicKey: 'pk_live_your_key_here',
+    amount: 5000,
+    currency: 'NGN',
+    narration: 'Order #1234',
+    customer: {
+      email: 'customer@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      phoneNumber: '+2348012345678',
+    },
+    meta: {},
+    callbackUrl: 'https://yoursite.com/payment/callback',
+    onSuccess: (data) => console.log('Payment successful', data),
+    onClose: () => console.log('Modal closed'),
+    onError: (err) => console.error('Payment error', err),
+  });
+
+  reeple.value.open();
+}
+</script>
+
+<template>
+  <button @click="pay">Pay Now</button>
+</template>
+```
+
+A fresh `Reeple` instance is created on each click so the config always reflects current component state (e.g. a cart total computed from props/store).

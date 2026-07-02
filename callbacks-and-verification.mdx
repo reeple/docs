@@ -1,0 +1,67 @@
+---
+title: Callbacks & Verification
+description: How the callback URL flow works, and how to verify a payment server-side
+---
+
+## The callback flow
+
+After a payment, Payshiga redirects the checkout iframe to your `callbackUrl` with query parameters indicating the outcome (e.g. `?status=success&reference=reeple_xxx`). The SDK detects this same-origin navigation, reads the query params, and fires `onSuccess(data)` — then closes the modal automatically.
+
+<Warning>
+  `onSuccess` is a convenience for updating your UI immediately. It fires from data read out of the browser URL, which a malicious user could tamper with. **Always verify the transaction server-side before marking an order as paid.**
+</Warning>
+
+## `ReepleSuccessData` shape
+
+```typescript
+interface ReepleSuccessData {
+  amount: number;
+  currency: string;
+  reference: string;
+  status: string;
+  message: string;
+  statusCode?: number;
+  success?: boolean;
+  // ...plus any additional query params Payshiga appends to your callbackUrl
+}
+```
+
+## Verifying on your server
+
+Your server-side handler at `callbackUrl` should:
+
+<Steps>
+  <Step title="Read the query params">
+    e.g. `?status=success&reference=reeple_xxx`
+  </Step>
+  <Step title="Verify the transaction">
+    Call Payshiga's verify endpoint server-to-server, using the `reference` — never trust the browser params alone.
+  </Step>
+  <Step title="Update your order/database">
+    Mark the order paid only after the server-side verification succeeds.
+  </Step>
+  <Step title="Return a response">
+    The SDK closes the modal automatically once the callback URL is reached; your `onSuccess` callback handles the client-side redirect.
+  </Step>
+</Steps>
+
+```javascript
+// Example Express.js callback handler
+app.get('/payment/callback', async (req, res) => {
+  const { reference, status } = req.query;
+
+  // Verify with Payshiga server-to-server (see Payshiga's API docs)
+  const verified = await verifyPayment(reference);
+
+  if (verified.status === 'success') {
+    await db.orders.markPaid(reference);
+  }
+
+  res.send('<html><body>Processing...</body></html>');
+  // The SDK closes the modal; your onSuccess callback handles the UI redirect
+});
+```
+
+## Session timeout
+
+If the checkout session isn't completed within **10 minutes**, `onError` fires and the session expires.

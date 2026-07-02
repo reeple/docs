@@ -1,0 +1,87 @@
+---
+title: React Native
+description: Integrate the Reeple checkout via a WebView bridge
+---
+
+<Warning>
+  `@reeple/sdk` is a browser/DOM-based library (it renders a modal and iframe) — it does not run directly inside React Native's JS runtime. There is no native Reeple SDK for React Native. The pattern below is the standard workaround used for web-based checkout SDKs on mobile: load a small hosted HTML page in a `WebView` and bridge its events back to native code.
+</Warning>
+
+## 1. Host a bridge HTML page
+
+Host this page yourself (e.g. as a static file on your own domain) — it embeds the CDN script and posts SDK events back to React Native.
+
+```html reeple-checkout.html
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8" /></head>
+<body>
+  <script src="https://payment.reeple.ai/reeple.iife.min.js"></script>
+  <script>
+    function post(type, payload) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type, payload }));
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    const reeple = new Reeple({
+      publicKey: params.get('publicKey'),
+      amount: Number(params.get('amount')),
+      currency: params.get('currency'),
+      narration: params.get('narration'),
+      customer: {
+        email: params.get('email'),
+        firstName: params.get('firstName'),
+        lastName: params.get('lastName'),
+        phoneNumber: params.get('phoneNumber'),
+      },
+      meta: {},
+      callbackUrl: window.location.href,
+      onSuccess: (data) => post('success', data),
+      onClose: () => post('close'),
+      onError: (err) => post('error', { message: err.message }),
+    });
+
+    reeple.open();
+  </script>
+</body>
+</html>
+```
+
+Pass the payment details as query params when loading the page from the `WebView` (see below).
+
+## 2. Load it from React Native
+
+```bash
+npm install react-native-webview
+```
+
+```tsx CheckoutScreen.tsx
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
+
+const checkoutUrl =
+  'https://yoursite.com/reeple-checkout.html' +
+  '?publicKey=pk_live_your_key_here' +
+  '&amount=5000&currency=NGN&narration=Order%20%231234' +
+  '&email=customer%40example.com&firstName=John&lastName=Doe&phoneNumber=%2B2348012345678';
+
+function handleMessage(event: WebViewMessageEvent) {
+  const { type, payload } = JSON.parse(event.nativeEvent.data);
+
+  if (type === 'success') {
+    console.log('Payment successful', payload);
+  } else if (type === 'close') {
+    console.log('Modal closed');
+  } else if (type === 'error') {
+    console.error('Payment error', payload.message);
+  }
+}
+
+export function CheckoutScreen() {
+  return <WebView source={{ uri: checkoutUrl }} onMessage={handleMessage} />;
+}
+```
+
+<Note>
+  Verify the payment on your server using the `reference` from the success payload — see [Callbacks & Verification](/callbacks-and-verification). Never mark an order paid based solely on the WebView message.
+</Note>

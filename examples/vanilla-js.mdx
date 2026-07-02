@@ -1,0 +1,77 @@
+---
+title: Vanilla JS
+description: A complete working example with a currency picker and event log
+---
+
+This is a full working page — a more complete version of the [Quickstart](/quickstart) CDN snippet, with a currency/amount picker and a live event log so you can see every callback fire.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reeple Checkout Example</title>
+</head>
+<body>
+  <div class="amount-row">
+    <select id="currency-select">
+      <option value="NGN" selected>NGN</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+      <!-- see /currencies for the full list -->
+    </select>
+    <input id="amount-input" type="number" min="1" placeholder="Enter amount" />
+    <button id="pay-btn">Pay</button>
+  </div>
+  <div id="log">Events will appear here...</div>
+
+  <script src="https://payment.reeple.ai/reeple.iife.min.js"></script>
+  <script>
+    const log = document.getElementById('log');
+    const amountInput = document.getElementById('amount-input');
+    const currencySelect = document.getElementById('currency-select');
+    const payBtn = document.getElementById('pay-btn');
+
+    function appendLog(msg) {
+      log.textContent += '\n' + new Date().toLocaleTimeString() + ' — ' + msg;
+    }
+
+    payBtn.addEventListener('click', () => {
+      const amount = parseFloat(amountInput.value);
+      const currency = currencySelect.value;
+
+      if (!amount || amount < 1) {
+        appendLog('error: please enter a valid amount');
+        return;
+      }
+
+      const reeple = new Reeple({
+        publicKey: 'pk_live_your_key_here',
+        amount,
+        currency,
+        narration: 'Order from vanilla JS example',
+        customer: {
+          email: 'customer@example.com',
+          firstName: 'John',
+          lastName: 'Doe',
+          phoneNumber: '+2348012345678',
+        },
+        meta: {},
+        callbackUrl: window.location.origin + '/payment/callback',
+
+        onSuccess: (data) => appendLog('onSuccess: ' + JSON.stringify(data, null, 2)),
+        onClose: () => appendLog('onClose: modal closed by user'),
+        onError: (err) => appendLog('onError: ' + err.message),
+        onLoad: () => appendLog('onLoad: iframe loaded'),
+      });
+
+      reeple.open();
+      appendLog('open() called — initiating payment of ' + currency + ' ' + amount.toLocaleString() + '...');
+    });
+  </script>
+</body>
+</html>
+```
+
+See [Configuration](/configuration) for the full field reference and [Callbacks & Verification](/callbacks-and-verification) for how to securely confirm the payment on your server.

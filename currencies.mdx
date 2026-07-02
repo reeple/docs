@@ -1,0 +1,45 @@
+---
+title: Supported Currencies
+description: All currency codes accepted by the amount and currency fields
+---
+
+The `currency` field accepts one of the following codes (typed as the `Currency` union in `@reeple/sdk`):
+
+<CardGroup cols={3}>
+  <Card title="NGN">Nigerian Naira</Card>
+  <Card title="USD">US Dollar</Card>
+  <Card title="EUR">Euro</Card>
+  <Card title="GBP">British Pound</Card>
+  <Card title="KES">Kenyan Shilling</Card>
+  <Card title="TZS">Tanzanian Shilling</Card>
+  <Card title="GHS">Ghanaian Cedi</Card>
+  <Card title="RWF">Rwandan Franc</Card>
+  <Card title="XAF">Central African CFA Franc</Card>
+  <Card title="XOF">West African CFA Franc</Card>
+  <Card title="ZAR">South African Rand</Card>
+  <Card title="UGX">Ugandan Shilling</Card>
+  <Card title="AUD">Australian Dollar</Card>
+  <Card title="CAD">Canadian Dollar</Card>
+  <Card title="ETB">Ethiopian Birr</Card>
+  <Card title="EGP">Egyptian Pound</Card>
+  <Card title="MAD">Moroccan Dirham</Card>
+  <Card title="MWK">Malawian Kwacha</Card>
+  <Card title="ZMW">Zambian Kwacha</Card>
+  <Card title="SLL">Sierra Leonean Leone</Card>
+  <Card title="MUR">Mauritian Rupee</Card>
+</CardGroup>
+
+## Amounts are in the smallest unit
+
+The `amount` field must always be passed in the smallest unit of the chosen currency:
+
+| Currency | Smallest unit | To charge 50.00 |
+|---|---|---|
+| `NGN` | kobo (1/100) | `amount: 5000` |
+| `USD` | cents (1/100) | `amount: 5000` |
+| `GBP` | pence (1/100) | `amount: 5000` |
+| `XOF` | none (zero-decimal) | `amount: 50` |
+
+<Note>
+  Adding a new currency requires an SDK update, since `Currency` is a fixed TypeScript union. If you need a currency that isn't listed here, contact Reeple.
+</Note>

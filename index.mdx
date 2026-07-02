@@ -1,20 +1,60 @@
 ---
-title: "Introduction"
-description: "Welcome to your project"
+title: Introduction
+description: A lightweight JavaScript SDK for accepting payments on Reeple
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+Reeple SDK is a lightweight JavaScript SDK for accepting payments. Drop one script tag (or one `npm install`) into any website and get a fully branded checkout modal with a single function call.
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+<Info>
+  Bundle size: **~6.2 KB minified** (CDN build)
+</Info>
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+## Two ways to integrate
+
+<CardGroup cols={2}>
+  <Card title="CDN script tag" href="/quickstart">
+    Fastest way to get started — no build step required. Best for most websites.
+  </Card>
+  <Card title="npm package" href="/quickstart">
+    Install `@reeple/sdk` and import it into your existing JS/TS build. Best for SPAs and framework apps.
+  </Card>
+</CardGroup>
+
+## How it works
+
+<Steps>
+  <Step title="Instantiate">
+    Create a `new Reeple({ publicKey, amount, customer, ... })` with your payment details.
+  </Step>
+  <Step title="Open">
+    Call `reeple.open()`. The SDK calls the Payshiga API to create a payment order.
+  </Step>
+  <Step title="Modal opens">
+    The SDK opens a modal overlay with an iframe. The iframe loads the Reeple-branded checkout page.
+  </Step>
+  <Step title="Customer pays">
+    The customer completes payment inside the iframe. Payshiga redirects the iframe to your `callbackUrl` (e.g. `https://yoursite.com/payment/callback?status=success&reference=xxx`).
+  </Step>
+  <Step title="Callback fires">
+    The SDK detects the navigation, reads the URL params, and fires `onSuccess(data)`. The modal closes automatically.
+  </Step>
+</Steps>
+
+Checkout page branding (logo, colors, name) is handled automatically based on your API key — no extra configuration needed.
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get a working checkout in a few minutes.
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration">
+    Full reference for every field and callback.
+  </Card>
+  <Card title="Supported currencies" icon="coins" href="/currencies">
+    See which currencies you can charge in.
+  </Card>
+  <Card title="Troubleshooting" icon="circle-question" href="/troubleshooting">
+    Common integration issues and fixes.
+  </Card>
+</CardGroup>

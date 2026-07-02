@@ -1,0 +1,56 @@
+---
+title: Next.js
+description: Using the Reeple SDK with App Router or Pages Router
+---
+
+`Reeple` touches `window` and the DOM, so it must run **client-side only**. It will throw during server-side rendering if instantiated at module scope or in a server component.
+
+## App Router
+
+Mark the component `'use client'` and use the same [`useReeple` hook](/examples/react) as the plain React example:
+
+```tsx app/checkout/CheckoutButton.tsx
+'use client';
+
+import { useReeple } from './useReeple';
+
+export function CheckoutButton() {
+  const { open } = useReeple({
+    publicKey: 'pk_live_your_key_here',
+    amount: 5000,
+    currency: 'NGN',
+    narration: 'Order #1234',
+    customer: {
+      email: 'customer@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      phoneNumber: '+2348012345678',
+    },
+    meta: {},
+    callbackUrl: 'https://yoursite.com/payment/callback',
+    onSuccess: (data) => console.log('Payment successful', data),
+    onClose: () => console.log('Modal closed'),
+    onError: (err) => console.error('Payment error', err),
+  });
+
+  return <button onClick={open}>Pay Now</button>;
+}
+```
+
+## Pages Router
+
+If you'd rather avoid `'use client'`-style boundaries, dynamically import the component with SSR disabled:
+
+```tsx pages/checkout.tsx
+import dynamic from 'next/dynamic';
+
+const CheckoutButton = dynamic(() => import('../components/CheckoutButton'), {
+  ssr: false,
+});
+
+export default function CheckoutPage() {
+  return <CheckoutButton />;
+}
+```
+
+`components/CheckoutButton.tsx` is the same component shown in the [React example](/examples/react) — no `'use client'` directive needed here since `ssr: false` already guarantees it only renders in the browser.

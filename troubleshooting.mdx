@@ -1,0 +1,38 @@
+---
+title: Troubleshooting
+description: Common integration issues and how to fix them
+---
+
+<AccordionGroup>
+  <Accordion title="onError fires immediately when I call open()">
+    Usually one of:
+    - `publicKey` is invalid, missing, or mismatched with `mode` (e.g. a `pk_test_...` key used with `mode: 'production'`)
+    - A network/CORS issue reaching the Payshiga API — check the browser console for the failed request
+    - A required field (`amount`, `currency`, `narration`, `customer`) is missing or malformed
+  </Accordion>
+
+  <Accordion title="onSuccess never fires, even though the customer paid">
+    Check that:
+    - `callbackUrl` is reachable by the iframe and same-origin with where the SDK is running (the SDK detects success by observing the iframe's navigation)
+    - Your server at `callbackUrl` isn't redirecting to a different origin or blocking the request
+    - The session hasn't exceeded the 10-minute timeout, which triggers `onError` instead
+  </Accordion>
+
+  <Accordion title="The modal doesn't open at all">
+    - Confirm `reeple.open()` is called in response to a user gesture (e.g. a click handler), not on page load
+    - Check the browser console for thrown errors from the constructor or `open()`
+    - If using the CDN build, confirm the script tag loaded successfully before your code runs
+  </Accordion>
+
+  <Accordion title="window.Reeple is undefined (CDN build)">
+    Make sure the `<script src="https://payment.reeple.ai/reeple.iife.min.js"></script>` tag appears **before** any code that references `Reeple`, and that it isn't blocked by an ad blocker, CSP, or a failed network request.
+  </Accordion>
+
+  <Accordion title="Which key do I use — live or test?">
+    Use a `pk_test_...` key together with `mode: 'sandbox'` while integrating, and switch to a `pk_live_...` key with `mode: 'production'` (the default) when you're ready to accept real payments. See [Sandbox / Testing](/sandbox-testing).
+  </Accordion>
+
+  <Accordion title="Where do I get a public key?">
+    Contact Reeple to receive your API key as part of onboarding.
+  </Accordion>
+</AccordionGroup>

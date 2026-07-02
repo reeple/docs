@@ -1,47 +1,101 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: Quickstart
+description: Go from zero to a working checkout in a few minutes
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+## Prerequisite
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+You need a Reeple public key (issued via Payshiga). Use a `pk_live_...` key for real payments, or a `pk_test_...` key with `mode: 'sandbox'` while you're integrating — see [Sandbox / Testing](/sandbox-testing).
 
-## Prerequisites
+<Tabs>
+  <Tab title="CDN">
+    Drop one script tag into your page — no build step required.
 
-Before you begin, you must have:
+    ```html
+    <script src="https://payment.reeple.ai/reeple.iife.min.js"></script>
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+    <button id="pay-btn">Pay Now</button>
 
-## Get started
+    <script>
+      document.getElementById('pay-btn').addEventListener('click', function () {
+        const reeple = new Reeple({
+          publicKey: 'pk_live_your_key_here',
+          amount: 5000,
+          currency: 'NGN',
+          narration: 'Order #1234',
+          customer: {
+            email: 'customer@example.com',
+            firstName: 'John',
+            lastName: 'Doe',
+            phoneNumber: '+2348012345678',
+          },
+          meta: {},
+          callbackUrl: 'https://yoursite.com/payment/callback',
+          onSuccess: function (data) {
+            console.log('Payment successful', data);
+            window.location.href = '/order-confirmed?ref=' + data.reference;
+          },
+          onClose: function () {
+            console.log('Customer closed the payment modal');
+          },
+          onError: function (error) {
+            console.error('Payment error:', error.message);
+          },
+        });
 
-<Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+        reeple.open();
+      });
+    </script>
+    ```
+
+    The script exposes a global `window.Reeple` class.
+  </Tab>
+  <Tab title="npm">
+    Best for SPAs and framework apps with an existing build step.
 
     ```bash
-    npm install your-package
+    npm install @reeple/sdk
     ```
-  </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
-    ```
-  </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+    ```typescript
+    import { Reeple } from '@reeple/sdk';
 
-    ```bash
-    your-cli start
+    const reeple = new Reeple({
+      publicKey: 'pk_live_your_key_here',
+      amount: 5000,
+      currency: 'NGN',
+      narration: 'Order #1234',
+      customer: {
+        email: 'customer@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '+2348012345678',
+      },
+      meta: {},
+      callbackUrl: 'https://yoursite.com/payment/callback',
+      onSuccess: (data) => console.log(data),
+      onClose: () => console.log('closed'),
+      onError: (err) => console.error(err),
+    });
+
+    reeple.open();
     ```
-  </Step>
-</Steps>
+
+    Looking for a framework-specific pattern? See [Framework Examples](/examples/react).
+  </Tab>
+</Tabs>
 
 <Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+  Test the full flow with `mode: 'sandbox'` and a `pk_test_...` key before switching to production — see [Sandbox / Testing](/sandbox-testing).
 </Tip>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration reference" href="/configuration">
+    Every field, callback, and method in detail.
+  </Card>
+  <Card title="Callbacks & verification" href="/callbacks-and-verification">
+    How to securely confirm a payment on your server.
+  </Card>
+</CardGroup>

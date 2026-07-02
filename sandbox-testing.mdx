@@ -1,0 +1,28 @@
+---
+title: Sandbox / Testing
+description: Test the full checkout flow before going live
+---
+
+Set `mode: 'sandbox'` to use Payshiga's test environment. Use test card numbers provided by Payshiga to simulate payments without real money moving.
+
+```javascript
+const reeple = new Reeple({
+  publicKey: 'pk_test_your_sandbox_key',
+  mode: 'sandbox',
+  // ... rest of config
+});
+```
+
+<Warning>
+  Use a `pk_test_...` key with `mode: 'sandbox'`, and a `pk_live_...` key with `mode: 'production'` (the default). Mixing a live key with sandbox mode, or vice versa, will not work as expected.
+</Warning>
+
+## What to test before going live
+
+- **Success path** — complete a test payment and confirm `onSuccess` fires and your server-side verification (see [Callbacks & Verification](/callbacks-and-verification)) marks the order paid.
+- **Close path** — open the modal and close it without paying; confirm `onClose` fires and your UI handles it gracefully.
+- **Error path** — trigger a failure (e.g. an invalid key) and confirm `onError` fires with a useful message.
+
+<Tip>
+  For test card numbers and other sandbox environment details, contact Reeple — this is provided as part of onboarding.
+</Tip>
