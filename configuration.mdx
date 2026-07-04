@@ -9,8 +9,8 @@ All options are passed to the `Reeple` constructor as a single `ReepleConfig` ob
 
 | Field | Type | Description |
 |---|---|---|
-| `publicKey` | `string` | Your Reeple public key (issued by Payshiga) |
-| `amount` | `number` | Payment amount in the smallest currency unit (kobo for NGN, cents for USD, etc.) |
+| `publicKey` | `string` | Your Reeple public key |
+| `amount` | `number` | Payment amount in the currency's standard unit (e.g. `50` for ₦50 or $50) |
 | `currency` | `Currency` | Currency code. See [supported currencies](/currencies) |
 | `narration` | `string` | Short description of the payment shown on the checkout page |
 | `customer.email` | `string` | Customer's email address |
@@ -20,14 +20,14 @@ All options are passed to the `Reeple` constructor as a single `ReepleConfig` ob
 | `meta` | `object` | Arbitrary key-value data attached to the transaction. Pass `{}` if you have nothing to add |
 
 <Note>
-  `amount` is always in the smallest unit of the currency — e.g. `5000` for NGN means ₦50.00 (kobo), and `5000` for USD means $50.00 (cents). See [Supported Currencies](/currencies) for more examples.
+  `amount` is a plain decimal number in the currency's standard unit — not kobo, cents, or any other smallest-unit representation. `amount: 50` charges ₦50.00 for NGN, and `amount: 49.99` charges $49.99 for USD. See [Supported Currencies](/currencies) for more examples.
 </Note>
 
 ## Optional fields
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `callbackUrl` | `string` | — | URL Payshiga redirects to after payment. Required if you want `onSuccess` to fire in the browser |
+| `callbackUrl` | `string` | — | URL Reeple redirects to after payment. Required if you want `onSuccess` to fire in the browser |
 | `reference` | `string` | auto-generated | Your unique transaction reference. SDK generates one if omitted |
 | `mode` | `'sandbox' \| 'production'` | `'production'` | Use `'sandbox'` for testing — see [Sandbox / Testing](/sandbox-testing) |
 

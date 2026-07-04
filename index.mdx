@@ -27,13 +27,13 @@ Reeple SDK is a lightweight JavaScript SDK for accepting payments. Drop one scri
     Create a `new Reeple({ publicKey, amount, customer, ... })` with your payment details.
   </Step>
   <Step title="Open">
-    Call `reeple.open()`. The SDK calls the Payshiga API to create a payment order.
+    Call `reeple.open()`. The SDK calls the Reeple API to create a payment order.
   </Step>
   <Step title="Modal opens">
     The SDK opens a modal overlay with an iframe. The iframe loads the Reeple-branded checkout page.
   </Step>
   <Step title="Customer pays">
-    The customer completes payment inside the iframe. Payshiga redirects the iframe to your `callbackUrl` (e.g. `https://yoursite.com/payment/callback?status=success&reference=xxx`).
+    The customer completes payment inside the iframe. Reeple redirects the iframe to your `callbackUrl` (e.g. `https://yoursite.com/payment/callback?status=success&reference=xxx`).
   </Step>
   <Step title="Callback fires">
     The SDK detects the navigation, reads the URL params, and fires `onSuccess(data)`. The modal closes automatically.

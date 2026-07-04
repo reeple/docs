@@ -29,16 +29,17 @@ The `currency` field accepts one of the following codes (typed as the `Currency`
   <Card title="MUR">Mauritian Rupee</Card>
 </CardGroup>
 
-## Amounts are in the smallest unit
+## Amount units
 
-The `amount` field must always be passed in the smallest unit of the chosen currency:
+The `amount` field is always a plain decimal number in the currency's standard unit — the same unit you'd quote a price in, not the smallest/lowest unit (kobo, cents, pence, etc.). This is uniform across every currency listed above:
 
-| Currency | Smallest unit | To charge 50.00 |
-|---|---|---|
-| `NGN` | kobo (1/100) | `amount: 5000` |
-| `USD` | cents (1/100) | `amount: 5000` |
-| `GBP` | pence (1/100) | `amount: 5000` |
-| `XOF` | none (zero-decimal) | `amount: 50` |
+| To charge | `amount` |
+|---|---|
+| ₦50.00 (NGN) | `amount: 50` |
+| $50.00 (USD) | `amount: 50` |
+| £50.00 (GBP) | `amount: 50` |
+
+Decimals are supported where the currency has them — e.g. `amount: 49.99` charges $49.99.
 
 <Note>
   Adding a new currency requires an SDK update, since `Currency` is a fixed TypeScript union. If you need a currency that isn't listed here, contact Reeple.

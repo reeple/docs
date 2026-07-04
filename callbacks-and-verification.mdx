@@ -5,7 +5,7 @@ description: How the callback URL flow works, and how to verify a payment server
 
 ## The callback flow
 
-After a payment, Payshiga redirects the checkout iframe to your `callbackUrl` with query parameters indicating the outcome (e.g. `?status=success&reference=reeple_xxx`). The SDK detects this same-origin navigation, reads the query params, and fires `onSuccess(data)` — then closes the modal automatically.
+After a payment, Reeple redirects the checkout iframe to your `callbackUrl` with query parameters indicating the outcome (e.g. `?status=success&reference=reeple_xxx`). The SDK detects this same-origin navigation, reads the query params, and fires `onSuccess(data)` — then closes the modal automatically.
 
 <Warning>
   `onSuccess` is a convenience for updating your UI immediately. It fires from data read out of the browser URL, which a malicious user could tamper with. **Always verify the transaction server-side before marking an order as paid.**
@@ -15,14 +15,14 @@ After a payment, Payshiga redirects the checkout iframe to your `callbackUrl` wi
 
 ```typescript
 interface ReepleSuccessData {
-  amount: number;
+  amount: number; // decimal in the currency's standard unit, e.g. 50 for ₦50
   currency: string;
   reference: string;
   status: string;
   message: string;
   statusCode?: number;
   success?: boolean;
-  // ...plus any additional query params Payshiga appends to your callbackUrl
+  // ...plus any additional query params Reeple appends to your callbackUrl
 }
 ```
 
@@ -35,7 +35,7 @@ Your server-side handler at `callbackUrl` should:
     e.g. `?status=success&reference=reeple_xxx`
   </Step>
   <Step title="Verify the transaction">
-    Call Payshiga's verify endpoint server-to-server, using the `reference` — never trust the browser params alone.
+    Call the verify endpoint server-to-server, using the `reference` — never trust the browser params alone.
   </Step>
   <Step title="Update your order/database">
     Mark the order paid only after the server-side verification succeeds.
@@ -48,12 +48,15 @@ Your server-side handler at `callbackUrl` should:
 ```javascript
 // Example Express.js callback handler
 app.get('/payment/callback', async (req, res) => {
-  const { reference, status } = req.query;
+  const { reference } = req.query;
 
-  // Verify with Payshiga server-to-server (see Payshiga's API docs)
-  const verified = await verifyPayment(reference);
+  const verifyRes = await fetch(
+    `https://api.payshiga.com/s2s/payments/verify/${reference}`,
+    { headers: { 'public-key': process.env.REEPLE_PUBLIC_KEY } }
+  );
+  const verified = await verifyRes.json();
 
-  if (verified.status === 'success') {
+  if (verified.data.status === 'success') {
     await db.orders.markPaid(reference);
   }
 
@@ -61,6 +64,12 @@ app.get('/payment/callback', async (req, res) => {
   // The SDK closes the modal; your onSuccess callback handles the UI redirect
 });
 ```
+
+<Note>
+  Keep your public key server-side in an environment variable — never hardcode it or bundle it into client-side code for this call.
+</Note>
+
+The verify endpoint responds with `{ success, statusCode, message, data: { status, reference, amount, currency } }`, where `data.status` is one of `pending`, `success`, or `failed`. It returns `400` if the order isn't found, `401` for an invalid/missing key, and `500` on an internal error.
 
 ## Session timeout
 
