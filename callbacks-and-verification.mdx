@@ -51,7 +51,7 @@ app.get('/payment/callback', async (req, res) => {
   const { reference } = req.query;
 
   const verifyRes = await fetch(
-    `https://api.payshiga.com/s2s/payments/verify/${reference}`,
+    `https://api-v3.reeple.ai/s2s/payments/verify/${reference}`,
     { headers: { 'public-key': process.env.REEPLE_PUBLIC_KEY } }
   );
   const verified = await verifyRes.json();
