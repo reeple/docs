@@ -1,0 +1,69 @@
+---
+title: Errors
+description: Common error response shapes returned by the Reeple API
+---
+
+Every error response follows the same envelope:
+
+```json
+{
+  "success": false,
+  "statusCode": 401,
+  "message": "Request is missing api key",
+  "timestamp": "2026-07-09T00:00:00.000Z",
+  "path": ""
+}
+```
+
+## Common errors
+
+<AccordionGroup>
+  <Accordion title="401 — Missing or invalid api key">
+    ```json
+    {
+      "success": false,
+      "statusCode": 401,
+      "message": "Request is missing api key",
+      "timestamp": "2026-07-09T00:00:00.000Z",
+      "path": ""
+    }
+    ```
+    Check that the `api-key` header is present and holds a valid secret key for the environment (test vs. live) you're calling.
+  </Accordion>
+
+  <Accordion title="400 — Bad request">
+    Returned when a required field is missing or malformed, or when an operation conflicts with existing state — e.g. requesting a second active bank account for a customer/currency pair that already has one.
+  </Accordion>
+
+  <Accordion title="404 — Not found">
+    Returned when a referenced resource — a customer, account, or transaction reference — doesn't exist.
+  </Accordion>
+
+  <Accordion title="422 — Unprocessable / insufficient balance">
+    ```json
+    {
+      "success": false,
+      "statusCode": 422,
+      "message": "Insufficient Balance"
+    }
+    ```
+    Returned when your wallet balance can't cover the requested amount and fees.
+  </Accordion>
+
+  <Accordion title="500 — Internal server error">
+    ```json
+    {
+      "success": false,
+      "statusCode": 500,
+      "message": "Internal server error",
+      "timestamp": "2026-07-09T00:00:00.000Z",
+      "path": ""
+    }
+    ```
+    An unexpected error occurred on Reeple's end.
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  A `500` or gateway error (e.g. `502`) on a payout or bill payment request **does not** necessarily mean it failed — it can also mean the response was lost after Reeple already processed it. Verify the transaction (e.g. via [Get transaction by reference](/api-reference/transactions/get-transaction-by-reference)) before retrying, to avoid double-processing.
+</Warning>

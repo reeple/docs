@@ -1,0 +1,30 @@
+---
+title: Tuition overview
+description: Tuition payment flows, supported currencies, and compliance requirements
+---
+
+Tuition payments are handled through the tuition endpoints, and may use a currency-specific payout path depending on the selected currency.
+
+## Main endpoint
+
+```
+POST https://api-v3.reeple.ai/tuitions/create
+```
+
+See [Create tuition](/api-reference/tuition/create-tuition).
+
+## Currency support
+
+| Currency | Supported | Notes |
+|---|---|---|
+| `GBP` | Yes | Uses a dedicated tuition payout path with institution validation and education-purpose routing |
+| Other enabled tuition currencies | Where configured | Continue through the general tuition flow |
+
+## KYC and AML requirements
+
+| Requirement | Applies | Notes |
+|---|---|---|
+| Business wallet must be funded | Yes | The wallet must cover amount plus fee |
+| Institution details must be valid | Yes | Validation happens before the tuition is processed |
+| Education purpose | Required for `GBP` | The GBP tuition route is locked to education |
+| Provider confirmation | Asynchronous | Final success or failure may arrive through a webhook — see [Webhooks](/api-reference/webhooks) |

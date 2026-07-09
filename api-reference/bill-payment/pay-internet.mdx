@@ -1,0 +1,28 @@
+---
+title: Pay internet
+description: Buy a data bundle for a phone number
+---
+
+Buy an internet data plan through the Reeple API. The amount is disbursed directly from your available balance.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/bill-payment/internet/pay
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `serviceCategoryId` | String | **Required.** The ID of the selected provider. |
+| `phoneNumber` | String | **Required.** Phone number to load data onto. |
+| `bundleCode` | String | **Required.** Identifier of the selected data plan — see [List data plans](/api-reference/bill-payment/list-data-plans). |
+
+```json
+{
+  "serviceCategoryId": "string",
+  "phoneNumber": "string",
+  "bundleCode": "bundle code selected"
+}
+```

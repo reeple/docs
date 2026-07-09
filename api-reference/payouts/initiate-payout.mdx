@@ -1,0 +1,125 @@
+---
+title: Initiate payout
+description: Send a payout from your business wallet
+---
+
+Initiate a payout. When you call this endpoint, Reeple transfers the funds from your available balance and notifies your application through a webhook once the transfer completes — see [Webhooks](/api-reference/webhooks).
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/transfer
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `accountNumber` | String | **Required.** The recipient's bank account number. |
+| `amount` | Number `>= 1` | **Required.** Amount to pay out. |
+| `bankCode` | String | **Required.** Code identifying the recipient's bank (routing number / BIC). |
+| `currency` | String | **Required.** See [Currency support](/api-reference/payouts/overview#currency-support). |
+| `narration` | String | **Required.** Description of the transfer, shown on the recipient's bank statement. |
+| `accountName` | String | The recipient's account name. |
+| `bankName` | String | The destination bank's name. |
+| `meta` | Object | Additional information about the transfer. |
+| `reference` | String | Your unique reference for this payout. |
+| `saveBeneficiary` | Boolean, default `false` | Whether to save the recipient for future transfers. |
+| `saveBeneficiaryTag` | String | Name to assign the saved beneficiary, if `saveBeneficiary` is `true`. |
+| `accountType` | Enum | For USD transfers: `CHECKING` \| `SAVINGS`. For AUD transfers, add `accountType: "BSB"` inside `meta`. |
+| `beneficiaryType` | Enum | `INDIVIDUAL` \| `BUSINESS`. |
+
+## NGN transfer example
+
+```json
+{
+  "currency": "NGN",
+  "bankName": "string",
+  "bankCode": "string",
+  "accountNumber": "string",
+  "accountName": "string",
+  "amount": 1,
+  "narration": "string",
+  "meta": {},
+  "saveBeneficiary": false,
+  "saveBeneficiaryTag": "string",
+  "reference": "string"
+}
+```
+
+## AUD transfer example
+
+```json
+{
+  "type": "BSB",
+  "currency": "AUD",
+  "country": "AU",
+  "accountNumber": "string",
+  "accountName": "string",
+  "amount": 10,
+  "narration": "string",
+  "meta": {
+    "accountType": "BSB",
+    "bsbNumber": "string"
+  },
+  "saveBeneficiary": false,
+  "saveBeneficiaryTag": "string",
+  "reference": "string"
+}
+```
+
+## USD transfer example
+
+```json
+{
+  "type": "ACH",
+  "currency": "USD",
+  "country": "US",
+  "accountNumber": "string",
+  "accountName": "string",
+  "bankName": "string",
+  "amount": 10,
+  "narration": "string",
+  "meta": {
+    "routingNumber": "string",
+    "accountType": "ACH",
+    "postCode": "string",
+    "city": "string",
+    "state": "string",
+    "line1": "bank address",
+    "bankAddress": "string",
+    "beneficiary": {
+      "type": "INDIVIDUAL",
+      "country": "beneficiary country",
+      "state": "beneficiary state",
+      "city": "beneficiary city",
+      "postCode": "beneficiary postCode",
+      "line1": "beneficiary address",
+      "address": "beneficiary address"
+    }
+  },
+  "saveBeneficiary": false,
+  "saveBeneficiaryTag": "string",
+  "reference": "string"
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Transfer In Progress",
+  "data": {}
+}
+```
+
+<Warning>
+  A `500`/`502` error on this endpoint does not necessarily mean the payout failed — it can also mean the response was lost after Reeple already processed it. Verify the transaction before retrying to avoid paying out twice. See [Errors](/api-reference/errors).
+</Warning>
+
+## Tracking a payout
+
+- **API** — check the status at any time via [Get transaction by reference](/api-reference/transactions/get-transaction-by-reference).
+- **Webhook** — Reeple notifies your registered webhook URL once the transfer completes — see [Webhooks](/api-reference/webhooks).

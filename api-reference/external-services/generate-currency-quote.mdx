@@ -1,0 +1,37 @@
+---
+title: Generate currency quote
+description: Get a conversion rate between two currencies
+---
+
+Get a rate and other relevant details for converting a specified amount from one currency to another.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/exchange-rate/quote
+```
+
+## Query parameters
+
+| Field | Type | Description |
+|---|---|---|
+| `amount` | Number `>= 1` | **Required.** Amount to convert. |
+| `currencyFrom` | String | **Required.** Starting currency — see [supported currencies](/currencies). |
+| `currencyTo` | String | **Required.** Target currency — see [supported currencies](/currencies). |
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Exchange rate fetched",
+  "data": {
+    "id": "clubg9uy10003m27tidh9u200",
+    "sendAmount": 3000,
+    "receiveAmount": 3.01,
+    "rate": 0.001004,
+    "currencyPair": "NGN/USD"
+  }
+}
+```

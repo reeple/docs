@@ -1,0 +1,35 @@
+---
+title: List TV packages
+description: List available cable TV bundle packages for a provider
+---
+
+List the bundle packages available for a given cable TV provider, before purchase.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/bill-payment/tv-services/{serviceCategoryId}
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `serviceCategoryId` | String | **Required.** The ID of the cable provider whose packages you want — see [TV services](/api-reference/bill-payment/tv-services). |
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Data plans fetched",
+  "data": [
+    { "name": "GOtv Smallie - Monthly", "bundleCode": "GOHAN", "amount": 1575, "isAmountFixed": true },
+    { "name": "GOtv Smallie - Quarterly", "bundleCode": "GOLITE", "amount": 4175, "isAmountFixed": true },
+    { "name": "GOtv Smallie - Yearly", "bundleCode": "GOLTANL", "amount": 12300, "isAmountFixed": true },
+    { "name": "GOtv Max", "bundleCode": "GOTVMAX", "amount": 7200, "isAmountFixed": true },
+    { "name": "GOtv Jinja Bouquet", "bundleCode": "GOTVNJ1", "amount": 3300, "isAmountFixed": true },
+    { "name": "GOtv Jolli Bouquet", "bundleCode": "GOTVNJ2", "amount": 4850, "isAmountFixed": true },
+    { "name": "Top Up", "bundleCode": "TOP_UP", "amount": null, "isAmountFixed": false }
+  ]
+}
+```

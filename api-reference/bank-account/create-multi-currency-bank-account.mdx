@@ -1,0 +1,112 @@
+---
+title: Create a multi-currency bank account
+description: Request a USD, EUR, or GBP receiving account for an existing customer
+---
+
+Request a multi-currency receiving account for a customer you've already created on Reeple. The issued account belongs to your customer, while your business remains the merchant account managing the relationship and receiving the collection events tied to that customer.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/accounts/generate/mcy
+```
+
+## Currency support
+
+| Currency | Supported |
+|---|---|
+| `USD` | Yes |
+| `EUR` | Yes |
+| `GBP` | Yes |
+
+Availability can still depend on which providers and rails are enabled for your business.
+
+<Note>
+  Account issuance is asynchronous. A successful API response means the request was accepted, not that the account is active yet — see [Issuance lifecycle](#issuance-lifecycle) below.
+</Note>
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `customerId` | String (UUID) | **Required.** The Reeple customer ID to issue the account to. |
+| `currency` | String | **Required.** `USD`, `EUR`, or `GBP`. |
+| `utilityBill` | String (URL) | **Required.** URL to the customer's utility bill or proof of address. |
+| `incomeBand` | String | **Required.** Customer's income range. |
+| `sourceOfIncome` | String | **Required.** Customer's source of income. |
+| `accountDesignation` | String | **Required.** Intended purpose of the account. |
+| `occupation` | String | **Required.** Customer's occupation. |
+| `employmentStatus` | String | **Required.** Customer's employment status. |
+| `reference` | String | Optional. Your own reference for the request. |
+| `additionalIdType` | Enum | **Required for the customer's first non-NGN account.** `PASSPORT`, `DRIVER_LICENSE`, or `RESIDENT_CARD`. Not needed on subsequent requests. |
+| `additionalIdNumber` | String | **Required for the customer's first non-NGN account.** The secondary ID's document number. |
+| `additionalIdDocument` | String (URL) | **Required for the customer's first non-NGN account.** URL to the secondary ID document. |
+| `additionalIdIssueDate` | String | **Required for the customer's first non-NGN account.** `YYYY-MM-DD`. |
+| `additionalIdExpiryDate` | String | **Required for the customer's first non-NGN account.** `YYYY-MM-DD`. |
+
+## Important rules
+
+- A customer can only have one active account per currency.
+- If a request for the same customer and currency is already processing, a new one may be rejected until the earlier one completes or fails.
+
+```json
+{
+  "utilityBill": "https://s3.aws.amazon.com/document/utilityBill.pdf",
+  "incomeBand": "$20,000 - $50,000",
+  "sourceOfIncome": "Salary",
+  "accountDesignation": "Savings",
+  "occupation": "Software Engineer",
+  "employmentStatus": "Employed",
+  "customerId": "123e4567-e89b-12d3-a456-426614174000",
+  "reference": "optional-reference-123",
+  "currency": "GBP",
+  "additionalIdType": "PASSPORT",
+  "additionalIdNumber": "A12345678",
+  "additionalIdDocument": "https://s3.aws.amazon.com/document/passport.pdf",
+  "additionalIdIssueDate": "2020-01-15",
+  "additionalIdExpiryDate": "2030-01-14"
+}
+```
+
+## Initial response
+
+A successful submission means the request was accepted for processing, not that the account is active yet.
+
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Bank account creation is processing..",
+  "data": {
+    "id": "d88343f6-f1c2-4e04-a74c-39c7add0c1f8",
+    "type": "CUSTOMER",
+    "accountId": "d88343f6-f1c2-4e04-8762-39c7add0c1f8",
+    "currency": "GBP",
+    "isVirtual": true,
+    "businessId": "0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e",
+    "reference": "shsi29wns02j9whdhnw012bd9dh2w",
+    "customerId": "0bb1dfc6-a74c-a74c-8762-39c7add0c1f8",
+    "status": "INACTIVE"
+  }
+}
+```
+
+Save the returned `id` — you'll need it to track the issuance lifecycle.
+
+## Issuance lifecycle
+
+A request can move through these states:
+
+- `INACTIVE` — the request was created and is still being processed
+- `ACTIVE` — the account was issued and is ready to receive funds
+- `DECLINED` — the request didn't pass verification or issuance checks
+
+Depending on the compliance and provider checks required for that customer, there can be a delay between the initial API response and final issuance.
+
+## Common errors
+
+| Status | Meaning |
+|---|---|
+| `400` | The customer already has an active bank account in that currency |
+| `400` | There's already a pending account request for that customer and currency |
+| `404` | The supplied customer couldn't be found |

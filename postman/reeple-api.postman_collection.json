@@ -1,0 +1,1443 @@
+{
+  "info": {
+    "_postman_id": "a9c33868-0a3c-4e50-a52e-b42f56db26c8",
+    "name": "Reeple API",
+    "description": "Server-side REST API for Reeple \u2014 bank accounts, bill payments, payouts, transactions, compliance, gift cards, tuition, and more.\n\n## Setup\n1. Import this collection and the companion environment (`Reeple API`).\n2. Select the `Reeple API` environment in the top-right environment dropdown.\n3. Set the `apiKey` variable to your secret key (`sk_test_...` for sandbox, `sk_live_...` for production).\n4. Send any request \u2014 auth and the base URL are already wired up.\n\n## Auth\nEvery request sends your secret key in the `api-key` header (configured once at the collection level, inherited by all requests). There is no separate sandbox hostname \u2014 the same `baseUrl` is used for both test and live keys; the environment is determined purely by which key prefix (`sk_test_...` / `sk_live_...`) you use.\n\n## Errors\nEvery error response follows the same envelope: `{ success: false, statusCode, message, timestamp, path }`. A `500`/`502` on a payout or bill-payment request does not necessarily mean it failed \u2014 verify via **Transactions > Get transaction by reference** before retrying, to avoid double-processing.\n\nSee the full docs at `/api-reference` for details on every endpoint's parameters and response shape.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "api-key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 2xx\", function () {",
+          "    pm.response.to.be.success;",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-v3.reeple.ai",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Bank Accounts",
+      "item": [
+        {
+          "name": "Create an NGN bank account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e\",\n  \"currency\": \"NGN\",\n  \"provider\": \"NGN-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/generate/ngn",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounts",
+                "generate",
+                "ngn"
+              ]
+            },
+            "description": "Issue a virtual NGN account number for a customer. The customer must already be registered with approved KYC and a verified BVN before you call this endpoint. Each customer can hold an account with either `NGN-1` or `NGN-2`, but not both at the same time.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `customerId` | String | **Required.** The unique ID of the customer to link the bank account to. |\n| `currency` | String | **Required.** The account currency. |\n| `reference` | String | Optional. Your own identifier for the operation (e.g. a user ID). |\n| `provider` | String | Optional. `NGN-1` or `NGN-2`. Defaults to `NGN-1` if omitted. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Create a multi-currency bank account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"utilityBill\": \"https://s3.aws.amazon.com/document/utilityBill.pdf\",\n  \"incomeBand\": \"$20,000 - $50,000\",\n  \"sourceOfIncome\": \"Salary\",\n  \"accountDesignation\": \"Savings\",\n  \"occupation\": \"Software Engineer\",\n  \"employmentStatus\": \"Employed\",\n  \"customerId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"reference\": \"optional-reference-123\",\n  \"currency\": \"GBP\",\n  \"additionalIdType\": \"PASSPORT\",\n  \"additionalIdNumber\": \"A12345678\",\n  \"additionalIdDocument\": \"https://s3.aws.amazon.com/document/passport.pdf\",\n  \"additionalIdIssueDate\": \"2020-01-15\",\n  \"additionalIdExpiryDate\": \"2030-01-14\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/generate/mcy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounts",
+                "generate",
+                "mcy"
+              ]
+            },
+            "description": "Request a multi-currency receiving account for a customer you've already created on Reeple. The issued account belongs to your customer, while your business remains the merchant account managing the relationship and receiving the collection events tied to that customer.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `customerId` | String (UUID) | **Required.** The Reeple customer ID to issue the account to. |\n| `currency` | String | **Required.** `USD`, `EUR`, or `GBP`. |\n| `utilityBill` | String (URL) | **Required.** URL to the customer's utility bill or proof of address. |\n| `incomeBand` | String | **Required.** Customer's income range. |\n| `sourceOfIncome` | String | **Required.** Customer's source of income. |\n| `accountDesignation` | String | **Required.** Intended purpose of the account. |\n| `occupation` | String | **Required.** Customer's occupation. |\n| `employmentStatus` | String | **Required.** Customer's employment status. |\n| `reference` | String | Optional. Your own reference for the request. |\n| `additionalIdType` | Enum | **Required for the customer's first non-NGN account.** `PASSPORT`, `DRIVER_LICENSE`, or `RESIDENT_CARD`. Not needed on subsequent requests. |\n| `additionalIdNumber` | String | **Required for the customer's first non-NGN account.** The secondary ID's document number. |\n| `additionalIdDocument` | String (URL) | **Required for the customer's first non-NGN account.** URL to the secondary ID document. |\n| `additionalIdIssueDate` | String | **Required for the customer's first non-NGN account.** `YYYY-MM-DD`. |\n| `additionalIdExpiryDate` | String | **Required for the customer's first non-NGN account.** `YYYY-MM-DD`. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Get a bank account",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "d88343f6-f1c2-4e04-8762-39c7add0c1f8",
+                  "description": "The unique identifier of the account you want to retrieve."
+                }
+              ]
+            },
+            "description": "Retrieve details for a single bank account by ID.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `id` | String | **Required.** The unique identifier of the account you want to retrieve. |"
+          },
+          "response": []
+        },
+        {
+          "name": "List bank accounts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounts?customerId=326a18a1-441a-457d-ba28-0538e0717c92&reference=shsi29wns02j9whdhnw012bd9dh2w",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounts"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "326a18a1-441a-457d-ba28-0538e0717c92",
+                  "disabled": true,
+                  "description": "Unique identifier of the customer whose accounts you want to retrieve."
+                },
+                {
+                  "key": "reference",
+                  "value": "shsi29wns02j9whdhnw012bd9dh2w",
+                  "disabled": true,
+                  "description": "Unique reference code identifying a bank account."
+                }
+              ]
+            },
+            "description": "Retrieve a list of bank accounts.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `customerId` | String | **Required.** Unique identifier of the customer whose accounts you want to retrieve. |\n| `reference` | String | **Required.** Unique reference code identifying a bank account. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bill Payments",
+      "item": [
+        {
+          "name": "Airtime services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/airtime-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "airtime-services"
+              ]
+            },
+            "description": "List the airtime providers available for [Pay airtime](/api-reference/bill-payment/pay-airtime)."
+          },
+          "response": []
+        },
+        {
+          "name": "Pay airtime",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCategoryId\": \"string\",\n  \"amount\": 200,\n  \"phoneNumber\": \"080xxxxxxxx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/airtime/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "airtime",
+                "pay"
+              ]
+            },
+            "description": "Buy airtime through the Reeple API. The amount is disbursed directly from your available balance.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The `serviceCategoryId` of the selected provider \u2014 see [Airtime services](/api-reference/bill-payment/airtime-services). |\n| `amount` | Number `>= 1` | **Required.** Amount to load onto the target number. |\n| `phoneNumber` | String | **Required.** 11-digit target phone number. |\n| `reference` | String | Optional identifier you can attach to the transaction. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Electricity services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/electricity-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "electricity-services"
+              ]
+            },
+            "description": "List the electricity providers (discos) available for validation and bill payment."
+          },
+          "response": []
+        },
+        {
+          "name": "Validate electricity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCategoryId\": \"string\",\n  \"entityNumber\": \"Your electricity account code\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/validate-electricity",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "validate-electricity"
+              ]
+            },
+            "description": "Confirm that a meter number is valid and active before paying, to reduce the risk of misdirected payments.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The ID of the electricity provider \u2014 see [Electricity services](/api-reference/bill-payment/electricity-services). |\n| `entityNumber` | String | **Required.** The meter number to validate. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Pay electricity bill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCategoryId\": \"string\",\n  \"amount\": 5000,\n  \"vendType\": \"PREPAID\",\n  \"meterNumber\": \"Unique code associated with your electricity account\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/electricity/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "electricity",
+                "pay"
+              ]
+            },
+            "description": "Buy electricity units through the Reeple API. The amount is disbursed directly from your available balance.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The ID of the selected electricity provider. |\n| `amount` | String | **Required.** Cost of the package. |\n| `meterNumber` | String | **Required.** Meter number for the electricity account. |\n| `vendType` | Enum `PREPAID` \\| `POSTPAID` | The type of utility service being paid for. |\n| `reference` | String | Optional information you can attach to the transaction. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Internet services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/internet-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "internet-services"
+              ]
+            },
+            "description": "List the internet (data) providers available for [Pay internet](/api-reference/bill-payment/pay-internet)."
+          },
+          "response": []
+        },
+        {
+          "name": "List data plans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/internet-services/:serviceCategoryId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "internet-services",
+                ":serviceCategoryId"
+              ],
+              "variable": [
+                {
+                  "key": "serviceCategoryId",
+                  "value": "61e98d28ab69182f326e6dc2",
+                  "description": "The ID of the provider whose data plans you want \u2014 see [Internet services](/api-reference/bill-payment/internet-services)."
+                }
+              ]
+            },
+            "description": "List the data plans available for a given internet provider, before purchase.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The ID of the provider whose data plans you want \u2014 see [Internet services](/api-reference/bill-payment/internet-services). |"
+          },
+          "response": []
+        },
+        {
+          "name": "Pay internet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCategoryId\": \"string\",\n  \"phoneNumber\": \"string\",\n  \"bundleCode\": \"bundle code selected\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/internet/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "internet",
+                "pay"
+              ]
+            },
+            "description": "Buy an internet data plan through the Reeple API. The amount is disbursed directly from your available balance.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The ID of the selected provider. |\n| `phoneNumber` | String | **Required.** Phone number to load data onto. |\n| `bundleCode` | String | **Required.** Identifier of the selected data plan \u2014 see [List data plans](/api-reference/bill-payment/list-data-plans). |"
+          },
+          "response": []
+        },
+        {
+          "name": "TV services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/tv-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "tv-services"
+              ]
+            },
+            "description": "List the cable TV providers available for validation and bill payment."
+          },
+          "response": []
+        },
+        {
+          "name": "Validate TV",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCategoryId\": \"string\",\n  \"entityNumber\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/validate-tv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "validate-tv"
+              ]
+            },
+            "description": "Check a cable TV account's validity and subscription status before paying.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The ID of the TV provider \u2014 see [TV services](/api-reference/bill-payment/tv-services). |\n| `entityNumber` | String | **Required.** The TV account (smartcard/IUC) number. |"
+          },
+          "response": []
+        },
+        {
+          "name": "List TV packages",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/tv-services/:serviceCategoryId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "tv-services",
+                ":serviceCategoryId"
+              ],
+              "variable": [
+                {
+                  "key": "serviceCategoryId",
+                  "value": "61e98d28ab69182f326e6dc2",
+                  "description": "The ID of the cable provider whose packages you want \u2014 see [TV services](/api-reference/bill-payment/tv-services)."
+                }
+              ]
+            },
+            "description": "List the bundle packages available for a given cable TV provider, before purchase.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The ID of the cable provider whose packages you want \u2014 see [TV services](/api-reference/bill-payment/tv-services). |"
+          },
+          "response": []
+        },
+        {
+          "name": "Pay TV bill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCategoryId\": \"string\",\n  \"bundleCode\": \"string\",\n  \"cardNumber\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/tv/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "tv",
+                "pay"
+              ]
+            },
+            "description": "Buy a cable TV subscription package through the Reeple API. The amount is disbursed directly from your available balance.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `serviceCategoryId` | String | **Required.** The ID of the selected cable provider. |\n| `cardNumber` | String | **Required.** The TV account (smartcard/IUC) number. |\n| `bundleCode` | String | **Required.** Identifier of the selected package \u2014 see [List TV packages](/api-reference/bill-payment/list-tv-packages). |"
+          },
+          "response": []
+        },
+        {
+          "name": "Payment history",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bill-payment/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bill-payment",
+                "history"
+              ]
+            },
+            "description": "Retrieve a list of all your bill payments."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Collections",
+      "item": [
+        {
+          "name": "Add a CAD collection email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cad-collections@merchant.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/business/settings/cad-collection-emails",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "settings",
+                "cad-collection-emails"
+              ]
+            },
+            "description": "Manage the CAD collection email addresses Reeple uses to automatically identify the owner of an incoming CAD collection. When a CAD collection webhook is received, Reeple checks the incoming sender's email against the emails you've registered here \u2014 if a match is found, Reeple reconciles the collection automatically and credits your CAD wallet. If no match is found, Reeple falls back to your business email on Reeple; if that also fails, the collection is deferred to the CAD claim flow.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `email` | String | **Required.** The CAD collection email you want Reeple to use for automatic reconciliation. A CAD collection email can only belong to one business, and must be the exact address that appears as the incoming CAD collection sender in the webhook source information. |"
+          },
+          "response": []
+        },
+        {
+          "name": "List CAD collection emails",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/business/settings/cad-collection-emails",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "settings",
+                "cad-collection-emails"
+              ]
+            },
+            "description": "Manage the CAD collection email addresses Reeple uses to automatically identify the owner of an incoming CAD collection. When a CAD collection webhook is received, Reeple checks the incoming sender's email against the emails you've registered here \u2014 if a match is found, Reeple reconciles the collection automatically and credits your CAD wallet. If no match is found, Reeple falls back to your business email on Reeple; if that also fails, the collection is deferred to the CAD claim flow.\n\nReturns the CAD collection emails currently registered for your business.\n\n**Parameters**\n\nThis endpoint takes no path, query, or body parameters."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a CAD collection email",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/business/settings/cad-collection-emails/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "settings",
+                "cad-collection-emails",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "3f9c2a1e-6b7d-4e2a-9c1f-8a2b3c4d5e6f",
+                  "description": "The ID of the registered CAD collection email to remove."
+                }
+              ]
+            },
+            "description": "Manage the CAD collection email addresses Reeple uses to automatically identify the owner of an incoming CAD collection. When a CAD collection webhook is received, Reeple checks the incoming sender's email against the emails you've registered here \u2014 if a match is found, Reeple reconciles the collection automatically and credits your CAD wallet. If no match is found, Reeple falls back to your business email on Reeple; if that also fails, the collection is deferred to the CAD claim flow.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `id` | String | **Required.** The ID of the registered CAD collection email to remove. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Claim CAD collection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionReference\": \"90980e50-0b83-40a6-aa46-ac8e795b1acd\",\n  \"senderEmail\": \"sender@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/deposits/cad/claim",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deposits",
+                "cad",
+                "claim"
+              ]
+            },
+            "description": "Use this endpoint when a CAD collection has already been received by Reeple, but automatic reconciliation couldn't confidently determine which business wallet to credit. Reeple only defers a CAD collection to claim after automatic reconciliation (matching sender email to a registered CAD collection email, then to the business email on Reeple) fails.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `transactionReference` | String | **Required.** The transaction reference of the recorded CAD collection you want to claim. |\n| `senderEmail` | String | **Required.** The sender email recorded against that CAD collection. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Compliance",
+      "item": [
+        {
+          "name": "Get AML record",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/aml/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "aml_xxx",
+                  "description": "The ID of the AML record to retrieve."
+                }
+              ]
+            },
+            "description": "Returns a single AML record by ID. The response has the same shape as List AML records, with an additional nested `deposit.transaction.bankTransfer` object containing full sender and recipient bank details.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `id` | String | AML record ID (path parameter). |"
+          },
+          "response": []
+        },
+        {
+          "name": "List AML records",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/aml?status=PENDING&page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true,
+                  "description": "Filter records by status. One of PENDING, PROOF_UPLOADED, APPROVED, REJECTED."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Records per page. Defaults to 20."
+                }
+              ]
+            },
+            "description": "Returns a paginated list of AML records for your business. Each record represents a flagged transaction that requires, or has already received, source-of-funds review.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `status` | `PENDING` \\| `PROOF_UPLOADED` \\| `APPROVED` \\| `REJECTED` | Filter records by status. Optional. |\n| `page` | String | Page number. Defaults to `1`. Optional. |\n| `limit` | String | Records per page. Defaults to `20`. Optional. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit AML proof",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proofUrl\": \"https://cdn.example.com/your-business/aml/proof.pdf\",\n  \"notes\": \"This is a salary payment from my employer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/aml/:id/proof",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                ":id",
+                "proof"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "aml_xxx",
+                  "description": "The ID of the AML record to submit proof for."
+                }
+              ]
+            },
+            "description": "Submit a proof document for an AML-flagged transaction. Once submitted, the record status moves to `PROOF_UPLOADED` and an `aml.proof.submitted` webhook fires. This endpoint only accepts submissions when the record status is `PENDING` or `PROOF_UPLOADED`; submitting proof for a record that's already `APPROVED` or `REJECTED` returns a `400` error.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `id` | String | AML record ID (path parameter). |\n| `proofUrl` | String (URL) | **Required.** URL of the uploaded proof document. |\n| `notes` | String | Optional context you want to provide to the review team. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit source of funds",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"shg_tr_123456\",\n  \"document\": \"https://example.com/document.pdf\",\n  \"additionalInfo\": \"Salary payment for the month of April\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transfer/submit/source-of-funds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transfer",
+                "submit",
+                "source-of-funds"
+              ]
+            },
+            "description": "Reeple can place a transaction in a pending review state when more information is required before it can be approved. There are two ways to submit source-of-funds details: Option 1, shown here, submits a hosted document URL to `POST /transfer/submit/source-of-funds`; Option 2 uploads the file directly as multipart form data to `POST /transfer/submit/source-of-funds/file`. This endpoint isn't tied to a single currency \u2014 it applies to any transaction moved into a pending compliance review state.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `reference` | String | **Required.** Transaction reference or transaction ID for the pending transaction. |\n| `document` | String (URL) | **Required** (Option 1 only). Public URL to the supporting document. |\n| `additionalInfo` | String | Optional context for the review team. |\n| `file` | File | **Required** (Option 2 only, via `POST /transfer/submit/source-of-funds/file` as multipart form data). Supporting source-of-funds file. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit source of funds (file upload)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "reference",
+                  "value": "shg_tr_123456",
+                  "type": "text",
+                  "description": "Required. Transaction reference or transaction ID for the pending transaction."
+                },
+                {
+                  "key": "additionalInfo",
+                  "value": "Salary payment for the month of April",
+                  "type": "text",
+                  "description": "Optional context for the review team."
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Required. Supporting source-of-funds file."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transfer/submit/source-of-funds/file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transfer",
+                "submit",
+                "source-of-funds",
+                "file"
+              ]
+            },
+            "description": "Option 2 for submitting source-of-funds details: upload the supporting file directly as multipart form data, instead of submitting a hosted document URL (see **Submit source of funds**).\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `reference` | String | **Required.** Transaction reference or transaction ID for the pending transaction. |\n| `additionalInfo` | String | Optional context for the review team. |\n| `file` | File | **Required.** Supporting source-of-funds file \u2014 attach it in the Body tab. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "Attach KYC",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idType\": \"NIN\",\n  \"idNumber\": \"123456789\",\n  \"document\": \"https://example.com/document.pdf\",\n  \"profileImage\": \"https://example.com/profile.jpg\",\n  \"bvn\": \"22222222222\",\n  \"dateOfBirth\": \"2002-10-29\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/:id/attach",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                ":id",
+                "attach"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "326a18a1-441a-457d-ba28-0538e0717c92",
+                  "description": "The unique identifier of the customer account to update."
+                }
+              ]
+            },
+            "description": "Attach or update Know Your Customer (KYC) documents for a customer.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `id` | String | **Required.** The unique identifier of the customer account to update. |\n| `idType` | Enum | **Required.** `NIN`, `PASSPORT`, `DRIVER_LICENSE`, or `VOTER_CARD`. |\n| `idNumber` | String | **Required if `idType` is provided.** Identification document number. |\n| `document` | String | **Required if `idType` is provided.** URL to the user's identification document. |\n| `profileImage` | String | **Required if `idType` is provided.** URL to the user's profile image. |\n| `bvn` | String | **Conditionally required.** Required when the customer's country is `NG`. |\n| `dateOfBirth` | String | Optional. `YYYY-MM-DD`. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "External Services",
+      "item": [
+        {
+          "name": "Name enquiry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"NGN\",\n  \"accountNumber\": \"0123456789\",\n  \"bankCode\": \"10023\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ng-bank/name-enquiry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ng-bank",
+                "name-enquiry"
+              ]
+            },
+            "description": "Resolve the account holder's name for a Nigerian bank account before initiating a transfer.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `accountNumber` | String | **Required.** The bank account number to resolve. |\n| `currency` | String | **Required.** `NGN`. |\n| `bankCode` | String | **Required.** Code identifying the bank \u2014 see Get banks. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Get banks",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/banks?currency=NGN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "banks"
+              ],
+              "query": [
+                {
+                  "key": "currency",
+                  "value": "NGN",
+                  "description": "Currency to list banks for. One of NGN, GBP, or USD."
+                }
+              ]
+            },
+            "description": "Fetch the list of banks for a currency. This response isn't paginated \u2014 the bank list is small, cached, and mainly used to populate a dropdown; paginate client-side if you need to.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `currency` | String | **Required.** `NGN`, `GBP`, or `USD`. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Get universities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tuition/:country/universities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition",
+                ":country",
+                "universities"
+              ],
+              "variable": [
+                {
+                  "key": "country",
+                  "value": "NG",
+                  "description": "The country to list universities for."
+                }
+              ]
+            },
+            "description": "List the universities you can pay tuition to in a given country.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `country` | String | **Required.** The country to list universities for. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Currency data",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/currencies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "currencies"
+              ]
+            },
+            "description": "Get details on all currencies available on Reeple."
+          },
+          "response": []
+        },
+        {
+          "name": "Foreign currencies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/currencies/foreign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "currencies",
+                "foreign"
+              ]
+            },
+            "description": "Get a list of foreign currencies only."
+          },
+          "response": []
+        },
+        {
+          "name": "Get currency pairs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/currencies/:currency/currency-pairs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "currencies",
+                ":currency",
+                "currency-pairs"
+              ],
+              "variable": [
+                {
+                  "key": "currency",
+                  "value": "USD",
+                  "description": "The target currency to get pairs for."
+                }
+              ]
+            },
+            "description": "Currency pairs are the currencies that a given currency can be exchanged for. This endpoint returns the available pairs for a target currency.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `currency` | String | **Required.** The target currency. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate currency quote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/exchange-rate/quote?amount=3000\u00a4cyFrom=NGN\u00a4cyTo=USD",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exchange-rate",
+                "quote"
+              ],
+              "query": [
+                {
+                  "key": "amount",
+                  "value": "3000",
+                  "description": "Amount to convert. Must be >= 1."
+                },
+                {
+                  "key": "currencyFrom",
+                  "value": "NGN",
+                  "description": "Starting currency \u2014 see supported currencies."
+                },
+                {
+                  "key": "currencyTo",
+                  "value": "USD",
+                  "description": "Target currency \u2014 see supported currencies."
+                }
+              ]
+            },
+            "description": "Get a rate and other relevant details for converting a specified amount from one currency to another.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `amount` | Number (>= 1) | **Required.** Amount to convert. |\n| `currencyFrom` | String | **Required.** Starting currency. |\n| `currencyTo` | String | **Required.** Target currency. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gift Cards",
+      "item": [
+        {
+          "name": "List all gift cards",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/giftcards?businessId=0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e&customerId=customer_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "giftcards"
+              ],
+              "query": [
+                {
+                  "key": "businessId",
+                  "value": "0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e",
+                  "disabled": false,
+                  "description": "Required. Unique identifier for the business associated with the cards."
+                },
+                {
+                  "key": "customerId",
+                  "value": "customer_id",
+                  "disabled": true,
+                  "description": "Optional. Unique identifier of the customer to filter by."
+                }
+              ]
+            },
+            "description": "Retrieve a list of gift cards bought by your business.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `businessId` | String | **Required.** Unique identifier for the business associated with the cards. |\n| `customerId` | String | Optional. Unique identifier of the customer to filter by. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Get gift cards",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/giftcards/:isoCode",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "giftcards",
+                ":isoCode"
+              ],
+              "variable": [
+                {
+                  "key": "isoCode",
+                  "value": "NG",
+                  "description": "Required. Two-letter country code per ISO 3166."
+                }
+              ]
+            },
+            "description": "Retrieve the gift card products available for a given country.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `isoCode` | String | **Required.** Two-letter country code per ISO 3166. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Order gift cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"NGN\",\n  \"productId\": 0,\n  \"amount\": 1,\n  \"email\": \"recipient@example.com\",\n  \"quantity\": 1,\n  \"note\": \"Happy birthday\",\n  \"reference\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/giftcards/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "giftcards",
+                "order"
+              ]
+            },
+            "description": "Order a gift card and send it to a specified recipient.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `amount` | Number `>= 1` | **Required.** Amount to load onto the gift card. |\n| `currency` | String, defaults to `USD` | **Required.** See supported currencies. |\n| `email` | String | **Required.** Recipient's email address. |\n| `productId` | Number | **Required.** ID of the specific gift card product. |\n| `quantity` | Number | **Required.** Number of units to purchase. |\n| `note` | String | Optional. Alphanumeric only, max 200 characters. |\n| `reference` | String | Optional reference for the transaction. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment Links",
+      "item": [
+        {
+          "name": "Create payment link",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"string\",\n  \"reference\": \"string\",\n  \"amount\": 1,\n  \"currency\": {\n    \"value\": \"NGN\",\n    \"type\": \"FIXED\"\n  },\n  \"channels\": [\"BANK_TRANSFER\", \"CARD\", \"SHIGA_QR\", \"BANK\"],\n  \"name\": \"string\",\n  \"callbackUrl\": \"https://yoursite.com/payment/callback\",\n  \"logoUrl\": \"https://yoursite.com/logo.png\",\n  \"acceptOtherCurrencies\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/create/link",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "create",
+                "link"
+              ]
+            },
+            "description": "Generate a secure, hosted payment link. This is useful for e-commerce platforms, service providers, and any business that needs a full payment gateway integration without building its own checkout UI.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `amount` | Number `>= 1` | **Required.** Amount to charge, in the currency's standard unit. |\n| `currency` | Object (`CurrencyDto`) | **Required.** Currency object with `value` (e.g. `NGN`) and `type` (e.g. `FIXED`). |\n| `currency.value` | String | **Required.** The currency code, e.g. `NGN`. |\n| `currency.type` | String | **Required.** Currency type, e.g. `FIXED`. |\n| `name` | String | **Required.** Name of the individual or business initiating the payment. |\n| `acceptOtherCurrencies` | Boolean, default `false` | Whether the transaction can accept currencies other than the one specified. |\n| `callbackUrl` | String | URL Reeple sends a notification to after the payment is processed. |\n| `channels` | Array of strings | Payment channels to allow, e.g. `BANK_TRANSFER`, `CARD`, `SHIGA_QR`, `BANK`. |\n| `description` | String | Description of the transaction. |\n| `logoUrl` | String | URL for a logo to show on the checkout page. |\n| `reference` | String | Your own reference for tracking. |\n\n### Other examples\n\nCard Auth Request (recurring payment) \u2014 add `\"recurring\": true` and a `customer` object to turn a payment-link request into a Card Auth Request. Minimum amount is 1 USD or 50 NGN; only USD and NGN cards are supported.\n\n```json\n{\n  \"name\": \"Acme Inc\",\n  \"description\": \"this is desc\",\n  \"customer\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@email.com\",\n    \"phoneNumber\": \"+2347065789997\"\n  },\n  \"amount\": 1,\n  \"currency\": {\n    \"value\": \"USD\",\n    \"type\": \"FIXED\"\n  },\n  \"channels\": [\"CARD\"],\n  \"callbackUrl\": \"https://yoursite.com/payment/callback\",\n  \"logoUrl\": \"https://yoursite.com/logo.png\",\n  \"recurring\": true\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payouts",
+      "item": [
+        {
+          "name": "Initiate payout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"NGN\",\n  \"bankName\": \"string\",\n  \"bankCode\": \"string\",\n  \"accountNumber\": \"string\",\n  \"accountName\": \"string\",\n  \"amount\": 1,\n  \"narration\": \"string\",\n  \"meta\": {},\n  \"saveBeneficiary\": false,\n  \"saveBeneficiaryTag\": \"string\",\n  \"reference\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transfer"
+              ]
+            },
+            "description": "Initiate a payout. When you call this endpoint, Reeple transfers the funds from your available balance and notifies your application through a webhook once the transfer completes \u2014 see Webhooks.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `accountNumber` | String | **Required.** The recipient's bank account number. |\n| `amount` | Number `>= 1` | **Required.** Amount to pay out. |\n| `bankCode` | String | **Required.** Code identifying the recipient's bank (routing number / BIC). |\n| `currency` | String | **Required.** See Currency support. |\n| `narration` | String | **Required.** Description of the transfer, shown on the recipient's bank statement. |\n| `accountName` | String | The recipient's account name. |\n| `bankName` | String | The destination bank's name. |\n| `meta` | Object | Additional information about the transfer. |\n| `reference` | String | Your unique reference for this payout. |\n| `saveBeneficiary` | Boolean, default `false` | Whether to save the recipient for future transfers. |\n| `saveBeneficiaryTag` | String | Name to assign the saved beneficiary, if `saveBeneficiary` is `true`. |\n| `accountType` | Enum | For USD transfers: `CHECKING` \\| `SAVINGS`. For AUD transfers, add `accountType: \"BSB\"` inside `meta`. |\n| `beneficiaryType` | Enum | `INDIVIDUAL` \\| `BUSINESS`. |\n\n### Other currency examples\n\nAUD transfer example:\n\n```json\n{\n  \"type\": \"BSB\",\n  \"currency\": \"AUD\",\n  \"country\": \"AU\",\n  \"accountNumber\": \"string\",\n  \"accountName\": \"string\",\n  \"amount\": 10,\n  \"narration\": \"string\",\n  \"meta\": {\n    \"accountType\": \"BSB\",\n    \"bsbNumber\": \"string\"\n  },\n  \"saveBeneficiary\": false,\n  \"saveBeneficiaryTag\": \"string\",\n  \"reference\": \"string\"\n}\n```\n\nUSD transfer example:\n\n```json\n{\n  \"type\": \"ACH\",\n  \"currency\": \"USD\",\n  \"country\": \"US\",\n  \"accountNumber\": \"string\",\n  \"accountName\": \"string\",\n  \"bankName\": \"string\",\n  \"amount\": 10,\n  \"narration\": \"string\",\n  \"meta\": {\n    \"routingNumber\": \"string\",\n    \"accountType\": \"ACH\",\n    \"postCode\": \"string\",\n    \"city\": \"string\",\n    \"state\": \"string\",\n    \"line1\": \"bank address\",\n    \"bankAddress\": \"string\",\n    \"beneficiary\": {\n      \"type\": \"INDIVIDUAL\",\n      \"country\": \"beneficiary country\",\n      \"state\": \"beneficiary state\",\n      \"city\": \"beneficiary city\",\n      \"postCode\": \"beneficiary postCode\",\n      \"line1\": \"beneficiary address\",\n      \"address\": \"beneficiary address\"\n    }\n  },\n  \"saveBeneficiary\": false,\n  \"saveBeneficiaryTag\": \"string\",\n  \"reference\": \"string\"\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Refunds",
+      "item": [
+        {
+          "name": "List refunds",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/refund/list?limit=10&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "refund",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true,
+                  "description": "Maximum number of refunds to return in a single response. Must be >= 1."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Which page of results to retrieve. Must be >= 1."
+                }
+              ]
+            },
+            "description": "Retrieve refunds processed in the past.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `limit` | Number `>= 1` | Maximum number of refunds to return in a single response. |\n| `page` | Number `>= 1` | Which page of results to retrieve. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Create refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"string\",\n  \"amount\": 0,\n  \"note\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/refund",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "refund"
+              ]
+            },
+            "description": "Request a refund for a transaction, when conditions are met.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `reference` | String | **Required.** Unique identifier of the transaction to refund. |\n| `amount` | Number | Amount to refund. |\n| `note` | String | Optional note. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "List transactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/transactions?list=10&page=1&search=REP_BzCeCbj3uJUQ&type=CREDIT",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
+              ],
+              "query": [
+                {
+                  "key": "list",
+                  "value": "10",
+                  "disabled": true,
+                  "description": "Maximum number of transactions to return in a single call. Must be >= 1."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page of transaction history to retrieve. Must be >= 1."
+                },
+                {
+                  "key": "search",
+                  "value": "REP_BzCeCbj3uJUQ",
+                  "disabled": true,
+                  "description": "Search within your transaction history."
+                },
+                {
+                  "key": "type",
+                  "value": "CREDIT",
+                  "disabled": true,
+                  "description": "Filter by transaction type. One of `CREDIT` or `DEBIT`."
+                }
+              ]
+            },
+            "description": "Retrieve all your transactions directly, without checking the dashboard.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `list` | Number `>= 1` | Maximum number of transactions to return in a single call. |\n| `page` | Number `>= 1` | Page of transaction history to retrieve. |\n| `search` | String | Search within your transaction history. |\n| `type` | Enum `CREDIT` \\| `DEBIT` | Filter by transaction type. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Get transaction by reference",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/transactions/:reference",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions",
+                ":reference"
+              ],
+              "variable": [
+                {
+                  "key": "reference",
+                  "value": "REP_BzCeCbj3uJUQ",
+                  "description": "Unique reference code identifying the transaction."
+                }
+              ]
+            },
+            "description": "Retrieve a single transaction by its reference.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `reference` | String | **Required.** Unique reference code identifying the transaction. |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tuition",
+      "item": [
+        {
+          "name": "Create tuition",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"SCHOOL\",\n  \"country\": \"string\",\n  \"university\": {\n    \"name\": \"string\",\n    \"accountName\": \"string\",\n    \"accountNumber\": \"string\",\n    \"accountBank\": \"string\",\n    \"accountType\": \"SAVINGS\",\n    \"sortCode\": \"string\",\n    \"iban\": \"string\",\n    \"swiftCode\": \"string\",\n    \"UCASNumber\": \"string\",\n    \"routingNumber\": \"string\",\n    \"postCode\": \"string\",\n    \"state\": \"string\",\n    \"city\": \"string\"\n  },\n  \"address\": \"string\",\n  \"amount\": 2000,\n  \"reference\": \"string\",\n  \"currency\": \"GBP\",\n  \"student\": {\n    \"reference\": \"string\",\n    \"email\": \"string\",\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"middleName\": \"string\",\n    \"invoiceNumber\": \"string\",\n    \"address\": \"string\",\n    \"note\": \"string\"\n  },\n  \"saveStudent\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tuitions/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuitions",
+                "create"
+              ]
+            },
+            "description": "Once you've resolved a target country and university, initiate the tuition payment.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `amount` | Number `>= 2000` | **Required.** Amount to pay. |\n| `country` | String | **Required.** Country where the university is located. |\n| `currency` | String | **Required.** Currency for the payment. |\n| `student` | Object (`CreateBeneficiaryDto`) | **Required.** Details of the tuition payment's beneficiary. |\n| `type` | Enum `SCHOOL` \\| `ACCOMODATION` | **Required.** Transaction type. |\n| `university` | Object (`UniversityDto`) | **Required.** The target university. |\n| `address` | String | Address of the person paying the tuition. |\n| `reference` | String | Your unique identifier for this request. |\n| `saveStudent` | Boolean | Whether to save the student's information for future use. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Universities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tuition/universities/:country",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition",
+                "universities",
+                ":country"
+              ],
+              "variable": [
+                {
+                  "key": "country",
+                  "value": "GB",
+                  "description": "Required. The country to list universities for."
+                }
+              ]
+            },
+            "description": "List the universities you can pay tuition to through the Reeple API, for a given country.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `country` | String | **Required.** The country to list universities for. |"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

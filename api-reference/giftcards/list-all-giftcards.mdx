@@ -1,0 +1,24 @@
+---
+title: List all gift cards
+description: List gift cards bought by your business
+---
+
+Retrieve a list of gift cards bought by your business.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/giftcards
+```
+
+## Query parameters
+
+| Field | Type | Description |
+|---|---|---|
+| `businessId` | String | **Required.** Unique identifier for the business associated with the cards. |
+| `customerId` | String | Optional. Unique identifier of the customer to filter by. |
+
+```bash
+curl -X GET "https://api-v3.reeple.ai/giftcards?businessId=0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e" \
+  -H "api-key: YOUR_SECRET_KEY"
+```

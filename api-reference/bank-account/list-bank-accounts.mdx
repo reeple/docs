@@ -1,0 +1,63 @@
+---
+title: List bank accounts
+description: Retrieve all bank accounts for a customer
+---
+
+Retrieve a list of bank accounts.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/accounts
+```
+
+## Query parameters
+
+| Field | Type | Description |
+|---|---|---|
+| `customerId` | String | **Required.** Unique identifier of the customer whose accounts you want to retrieve. |
+| `reference` | String | **Required.** Unique reference code identifying a bank account. |
+
+```bash
+curl -X GET "https://api-v3.reeple.ai/accounts?customerId=326a18a1-441a-457d-ba28-0538e0717c92&reference=shsi29wns02j9whdhnw012bd9dh2w" \
+  -H "api-key: YOUR_SECRET_KEY"
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Fetched list of bank accounts",
+  "data": {
+    "payload": [
+      {
+        "id": "d88343f6-f1c2-4e04-8762-39c7add0c1f8",
+        "name": "Acme Inc / test testing",
+        "number": "1185510924",
+        "bank": "Testing Bank",
+        "bankCode": "000017",
+        "currency": "NGN",
+        "currencyType": "NGN",
+        "iban": "NG12345678901234567890",
+        "sortCode": "12-34-56",
+        "checkNumber": "123456",
+        "bankSwiftCode": "TESTNG33XXX",
+        "addressableIn": "Nigeria",
+        "bankAddress": "123 Testing Bank Street, Lagos, Nigeria",
+        "countryCode": "NG",
+        "isVirtual": true,
+        "createdAt": "2024-05-01T22:37:54.322Z",
+        "updatedAt": "2024-05-01T22:37:54.322Z",
+        "businessId": "0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e",
+        "reference": "shsi29wns02j9whdhnw012bd9dh2w",
+        "customerId": "326a18a1-441a-457d-ba28-0538e0717c92"
+      }
+    ],
+    "meta": {
+      "total": 1
+    }
+  }
+}
+```

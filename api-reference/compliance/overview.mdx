@@ -1,0 +1,37 @@
+---
+title: Compliance overview
+description: KYC and AML endpoints that apply to payout and collection flows
+---
+
+Compliance controls in this API show up in two places:
+
+- customer KYC attachment
+- AML review and source-of-funds submission for pending transactions
+
+## KYC endpoint
+
+Attach or update a customer's identity data:
+
+```
+PUT https://api-v3.reeple.ai/customers/{id}/attach
+```
+
+See [Attach KYC](/api-reference/customer/attach-kyc).
+
+## AML endpoints
+
+Use these when a transaction has been held in a pending review state:
+
+```
+POST https://api-v3.reeple.ai/transfer/submit/source-of-funds
+POST https://api-v3.reeple.ai/transfer/submit/source-of-funds/file
+```
+
+See [Submit source of funds](/api-reference/compliance/submit-source-of-funds).
+
+## Compliance summary
+
+| Area | What it affects |
+|---|---|
+| Customer KYC | Multi-currency account issuance, customer-linked flows, and provider verification requirements |
+| AML review | Pending transfers and other transactions that require documentary evidence before they're completed |

@@ -1,0 +1,28 @@
+---
+title: Create refund
+description: Request a refund for a transaction
+---
+
+Request a refund for a transaction, when conditions are met.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/refund
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `reference` | String | **Required.** Unique identifier of the transaction to refund. |
+| `amount` | Number | Amount to refund. |
+| `note` | String | Optional note. |
+
+```json
+{
+  "reference": "string",
+  "amount": 0,
+  "note": "string"
+}
+```

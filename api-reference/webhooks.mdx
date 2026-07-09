@@ -1,0 +1,73 @@
+---
+title: Webhooks
+description: Receive real-time notifications about transaction status changes
+---
+
+Webhooks let you receive real-time notifications about your transactions instead of polling the API for updates. As a transaction progresses through its lifecycle, Reeple sends a `POST` request to your registered webhook URL with the final status.
+
+## Setting up your webhook URL
+
+<Note>
+  Reeple doesn't currently offer a self-service dashboard for webhook configuration. Contact Reeple to register your webhook URL. Make sure the URL is publicly reachable and doesn't require authentication to accept the request.
+</Note>
+
+## Payload shape
+
+| Field | Data type | Description |
+|---|---|---|
+| `event` | String | `transfer.success`, `transfer.failed`, `charge.success`, or `charge.failed` |
+| `data` | Object | The transaction details: `amount`, `fee`, `currency`, `status`, `reference` |
+| `data.amount` | Number | Transaction amount |
+| `data.fee` | Number | Transaction fee |
+| `data.currency` | String | Transaction currency |
+| `data.status` | String | `success` or `failed` |
+| `data.reference` | String | Transaction reference — use this to look up the transaction via [Get transaction by reference](/api-reference/transactions/get-transaction-by-reference) |
+
+## Verifying webhook requests
+
+Only process webhook requests you can verify came from Reeple. Every request includes an `x-reeple-signature` header — an HMAC-SHA512 hash of the raw request body, signed with your secret key. Recompute the hash yourself and compare it using a constant-time check before trusting the payload.
+
+```javascript
+const crypto = require('crypto');
+
+const secretKey = process.env.REEPLE_SECRET_KEY;
+
+function signaturesMatch(expected, received) {
+  const bufferA = Buffer.from(expected);
+  const bufferB = Buffer.from(received);
+
+  if (bufferA.length !== bufferB.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(bufferA, bufferB);
+}
+
+router.post('/webhooks/reeple', (req, res) => {
+  const expectedSignature = crypto
+    .createHmac('sha512', secretKey)
+    .update(JSON.stringify(req.body))
+    .digest('hex');
+
+  const receivedSignature = req.headers['x-reeple-signature'];
+
+  if (!signaturesMatch(expectedSignature, receivedSignature)) {
+    return res.sendStatus(401);
+  }
+
+  // Process the event
+  res.sendStatus(200);
+});
+```
+
+<Warning>
+  Reject any request whose signature doesn't match. A mismatch means the request didn't come from Reeple.
+</Warning>
+
+## Best practices
+
+- **Use HTTPS** — always serve your webhook URL over HTTPS.
+- **Respond quickly** — return a `2xx` status as soon as you've accepted the event, and do slower processing (database writes, notifications) asynchronously.
+- **Be idempotent** — the same event may be delivered more than once. Design your handler so processing it twice is safe.
+- **Log events** — keep a record of received webhooks for debugging and auditing.
+- **Handle retries** — a failed or timed-out delivery may be retried, so don't assume a single delivery attempt.

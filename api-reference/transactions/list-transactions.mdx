@@ -1,0 +1,83 @@
+---
+title: List transactions
+description: Retrieve all transactions for your business
+---
+
+Retrieve all your transactions directly, without checking the dashboard.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/transactions
+```
+
+## Query parameters
+
+| Field | Type | Description |
+|---|---|---|
+| `list` | Number `>= 1` | Maximum number of transactions to return in a single call. |
+| `page` | Number `>= 1` | Page of transaction history to retrieve. |
+| `search` | String | Search within your transaction history. |
+| `type` | Enum `CREDIT` \| `DEBIT` | Filter by transaction type. |
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Fetched transactions list",
+  "data": {
+    "transactions": [
+      {
+        "id": "29ccbb6f-6204-49a8-a33f-ccac5bb94f6c",
+        "amount": 10,
+        "status": "PENDING",
+        "fee": 0,
+        "description": "Deposit",
+        "type": "CREDIT",
+        "channel": null,
+        "method": null,
+        "currency": "NGN",
+        "createdAt": "2024-04-28T03:03:35.346Z",
+        "updatedAt": "2024-04-28T03:03:35.346Z",
+        "businessId": "0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e",
+        "reference": "REP_BzCeCbj3uJUQ",
+        "depositId": "",
+        "spendingId": null,
+        "refundId": null,
+        "topupId": null,
+        "tuitionId": null,
+        "walletId": "",
+        "cardId": null,
+        "swapId": null,
+        "balance": null,
+        "refund": null,
+        "topup": null,
+        "spending": null,
+        "deposit": {
+          "id": "",
+          "currency": "NGN",
+          "amount": 10,
+          "fee": 0,
+          "amountSent": 10,
+          "status": "PENDING",
+          "depositType": "BANK_TRANSFER",
+          "createdAt": "2024-04-28T03:03:35.346Z",
+          "updatedAt": "2024-04-28T03:03:35.346Z",
+          "provider": null,
+          "providerId": ""
+        },
+        "billPayment": null,
+        "swap": null
+      }
+    ],
+    "meta": {
+      "size": 1,
+      "totalItems": 1,
+      "nextPage": 0,
+      "previousPage": 0
+    }
+  }
+}
+```

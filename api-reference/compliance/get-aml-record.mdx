@@ -1,0 +1,12 @@
+---
+title: Get AML record
+description: Get a single AML record with full deposit and bank transfer details
+---
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/aml/:id
+```
+
+Returns a single AML record by ID. The response has the same shape as [List AML records](/api-reference/compliance/list-aml-records), with an additional nested `deposit.transaction.bankTransfer` object containing full sender and recipient bank details.

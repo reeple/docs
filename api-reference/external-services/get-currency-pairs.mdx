@@ -1,0 +1,46 @@
+---
+title: Get currency pairs
+description: List the currencies a given currency can be exchanged for
+---
+
+Currency pairs are the currencies that a given currency can be exchanged for. This endpoint returns the available pairs for a target currency.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/currencies/{currency}/currency-pairs
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `currency` | String | **Required.** The target currency. |
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Currency pairs fetched",
+  "data": [
+    {
+      "id": 3,
+      "icon": "https://cdn.example.com/country-logo/GBP.svg",
+      "currency": "GBP",
+      "countryCode": "GB",
+      "name": "British Pound",
+      "country": "United Kingdom",
+      "symbol": "£"
+    },
+    {
+      "id": 1,
+      "icon": "https://cdn.example.com/country-logo/USD.svg",
+      "currency": "USD",
+      "countryCode": "US",
+      "name": "US Dollars",
+      "country": "United States of America",
+      "symbol": "$"
+    }
+  ]
+}
+```

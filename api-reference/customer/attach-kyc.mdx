@@ -1,0 +1,88 @@
+---
+title: Attach KYC
+description: Securely attach or update a customer's identity documents
+---
+
+Attach or update Know Your Customer (KYC) documents for a customer.
+
+## Endpoint
+
+```
+PUT https://api-v3.reeple.ai/customers/{id}/attach
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | String | **Required.** The unique identifier of the customer account to update. |
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `idType` | Enum | **Required.** `NIN`, `PASSPORT`, `DRIVER_LICENSE`, or `VOTER_CARD`. |
+| `idNumber` | String | **Required if `idType` is provided.** Identification document number. |
+| `document` | String | **Required if `idType` is provided.** URL to the user's identification document. |
+| `profileImage` | String | **Required if `idType` is provided.** URL to the user's profile image. |
+| `bvn` | String | **Conditionally required.** Required when the customer's country is `NG`. |
+| `dateOfBirth` | String | Optional. `YYYY-MM-DD`. |
+
+## Country and currency support
+
+This endpoint isn't tied to a single transaction currency — it applies to customer identity verification across customer-linked flows.
+
+| Requirement | Applies |
+|---|---|
+| BVN | Required when the customer country is `NG` |
+| Identity document and profile image | Required when customer identity data is being attached for verification |
+
+## KYC and AML requirements
+
+| Requirement | Applies | Notes |
+|---|---|---|
+| Customer identity document | Yes | Required when attaching or updating KYC |
+| Country-specific identity rules | Yes | Nigeria requires BVN in the documented flow |
+| AML review | Conditional | KYC quality affects whether downstream products can be issued or funded |
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Customer created successfully",
+  "data": {
+    "id": "326a18a1-441a-457d-ba28-0538e0717c92",
+    "email": "test@example.com",
+    "firstName": "test",
+    "lastName": "testing",
+    "city": "Bariga",
+    "state": "Lagos",
+    "country": "Nigeria",
+    "zipCode": "100231",
+    "line1": "123, Example road",
+    "line2": null,
+    "phoneNumber": "+2348131911964",
+    "house": "Zk9",
+    "dateOfBirth": "2002-10-29T00:00:00.000Z",
+    "idType": "NIN",
+    "idNumber": "123456789",
+    "document": "https://example.com/document.pdf",
+    "imageURL": "https://example.com/profile.jpg",
+    "reference": "w72hs8shshshshw8s8292ushs",
+    "createdAt": "2024-05-01T22:10:44.329Z",
+    "status": "REJECTED",
+    "reason": "Utility bill is older than 3 months",
+    "businessId": "0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e"
+  }
+}
+```
+
+<Note>
+  Save the returned customer `id` — you'll need it for bank account issuance, tuition payments, and other customer-linked endpoints.
+</Note>
+
+## Common errors
+
+| Status | Meaning |
+|---|---|
+| `422` | Insufficient balance |

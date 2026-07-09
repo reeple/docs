@@ -1,0 +1,34 @@
+---
+title: Get banks
+description: List banks for a given currency
+---
+
+Fetch the list of banks for a currency.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/banks?{currency}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `currency` | String | `NGN`, `GBP`, or `USD`. |
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Fetched list of bank accounts",
+  "data": [
+    { "id": "1", "bankCode": "99901", "bankName": "Gateway 2 Bank" },
+    { "id": "2", "bankCode": "10023", "bankName": "Gateway 1 Bank" }
+  ]
+}
+```
+
+<Note>
+  This response isn't paginated — the bank list is small, cached, and mainly used to populate a dropdown. Paginate client-side if you need to.
+</Note>

@@ -1,0 +1,62 @@
+---
+title: Collections overview
+description: How incoming transfers are reconciled to your business wallet
+---
+
+Reeple supports multiple collection flows depending on the currency, the receiving setup on your account, and how much attribution information is available when an inflow arrives.
+
+<Note>
+  This page is intentionally product-focused. Your exact currency and rail availability may differ based on the wallets, providers, and collection methods enabled for your business.
+</Note>
+
+## Collection models
+
+### 1. Automatically reconciled collections
+
+Used when Reeple can confidently attribute an incoming transfer to the right business wallet at the point the inflow webhook is received. This usually depends on one or more of the following already existing in your integration:
+
+- an issued customer account or virtual account
+- an internal customer-to-account mapping
+- a valid wallet mapping for the receiving currency
+- sufficient sender or transaction metadata to reconcile safely
+
+If attribution succeeds and no compliance hold is triggered, Reeple creates the internal deposit record and credits the business wallet.
+
+### 2. Review-led collections
+
+Some collections are received successfully but can't be credited immediately because more review is required — for example when sender details are incomplete or don't match the expected account holder, or the inflow triggers an internal compliance rule. Reeple records the inflow and keeps it pending until the required review is complete.
+
+### 3. Claim-based collections
+
+Some collections are deferred to a claim step when Reeple can't confidently determine the owner during webhook processing. Reeple stores the incoming collection details and exposes a business-facing claim endpoint — once the claim payload is verified, Reeple reconciles the inflow and credits the correct wallet.
+
+The currently documented claim-based flow is:
+
+- [Claim CAD collection](/api-reference/collections/claim-cad-collection)
+
+## CAD collection behavior
+
+CAD collections have a dedicated reconciliation flow. When a successful CAD collection arrives, Reeple attempts automatic reconciliation in this order:
+
+1. Match the incoming sender email against the CAD collection emails your business has registered — see [Manage CAD collection emails](/api-reference/collections/manage-cad-collection-emails).
+2. If that fails, match the same incoming collection email against your business email on Reeple.
+3. If both checks fail, Reeple stores the CAD collection and waits for you to claim it manually.
+
+## Currency support
+
+Collection support isn't globally the same for every business — it depends on the wallets enabled for your business, the account issuance/receiving setup already completed, the collection rails available for the relevant currency, and any provider or compliance requirements attached to that flow. For any currency-specific endpoint, supported currencies are stated on that endpoint's page.
+
+## KYC and AML requirements
+
+| Scenario | KYC / AML expectation |
+|---|---|
+| Automatic account-based collection | The linked customer and receiving account must already exist and be valid for the currency being collected |
+| Review-led collection | Reeple may place the inflow in a pending state until you provide enough evidence for compliance review |
+| Claim-based collection | You must provide the required claim data exactly as requested by the endpoint |
+| CAD automatic reconciliation | The incoming collection email must map to your registered CAD collection email list or your business email |
+
+## What to expect
+
+- A successful incoming transfer doesn't always mean an immediate wallet credit.
+- Some collections are credited automatically, while others wait for review or claim.
+- For CAD collections, automatic reconciliation is attempted first, and claim is only used as the fallback when ownership can't be determined.

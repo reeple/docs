@@ -1,0 +1,47 @@
+---
+title: Order gift cards
+description: Order and send a gift card to a recipient
+---
+
+Order a gift card and send it to a specified recipient.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/giftcards/order
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `amount` | Number `>= 1` | **Required.** Amount to load onto the gift card. |
+| `currency` | String, defaults to `USD` | **Required.** See [supported currencies](/currencies). |
+| `email` | String | **Required.** Recipient's email address. |
+| `productId` | Number | **Required.** ID of the specific gift card product. |
+| `quantity` | Number | **Required.** Number of units to purchase. |
+| `note` | String | Optional. Alphanumeric only, max 200 characters. |
+| `reference` | String | Optional reference for the transaction. |
+
+```json
+{
+  "currency": "NGN",
+  "productId": 0,
+  "amount": 1,
+  "email": "recipient@example.com",
+  "quantity": 1,
+  "note": "Happy birthday",
+  "reference": "string"
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Giftcard order in progress",
+  "data": {}
+}
+```

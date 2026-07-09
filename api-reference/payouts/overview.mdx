@@ -1,0 +1,35 @@
+---
+title: Payouts overview
+description: Payout capabilities, supported currencies, and operational requirements
+---
+
+Payouts are initiated through the transfer API and completed asynchronously, through provider processing and transfer webhooks.
+
+## Main endpoint
+
+```
+POST https://api-v3.reeple.ai/transfer
+```
+
+See [Initiate payout](/api-reference/payouts/initiate-payout).
+
+## Currency support
+
+| Currency | Supported | Notes |
+|---|---|---|
+| `NGN` | Yes | Local payout flow |
+| `USD` | Yes | Requires beneficiary and routing data appropriate for USD payouts |
+| `EUR` | Yes | Requires beneficiary and bank details appropriate for EUR payouts |
+| `GBP` | Yes | Requires beneficiary and bank details appropriate for GBP payouts |
+| `CAD` | Yes | Supports CAD payout processing, including Interac-specific handling where required |
+| `AUD` | Yes | Supported with currency-specific beneficiary fields |
+
+## KYC and AML requirements
+
+| Requirement | Applies | Notes |
+|---|---|---|
+| Business must be enabled for the payout currency | Yes | Currency permissions are enforced internally |
+| Wallet balance must cover amount and fees | Yes | Payouts fail if balance is insufficient |
+| Beneficiary data must be valid for the selected rail | Yes | Required fields differ by currency |
+| Customer KYC may be required | Conditional | API payouts use customer KYC checks where the flow is customer-linked |
+| Source of funds may be requested | Conditional | Pending transactions can require source-of-funds submission before approval — see [Submit source of funds](/api-reference/compliance/submit-source-of-funds) |

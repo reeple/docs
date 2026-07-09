@@ -1,0 +1,55 @@
+---
+title: Submit source of funds
+description: Submit source-of-funds information for a pending transaction under review
+---
+
+Reeple can place a transaction in a pending review state when more information is required before it can be approved. There are two ways to submit source-of-funds details.
+
+## Option 1: submit a document URL
+
+Use this when you already have a hosted document URL.
+
+```
+POST https://api-v3.reeple.ai/transfer/submit/source-of-funds
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `reference` | String | **Required.** Transaction reference or transaction ID for the pending transaction. |
+| `document` | String (URL) | **Required.** Public URL to the supporting document. |
+| `additionalInfo` | String | Optional context for the review team. |
+
+```json
+{
+  "reference": "shg_tr_123456",
+  "document": "https://example.com/document.pdf",
+  "additionalInfo": "Salary payment for the month of April"
+}
+```
+
+## Option 2: upload the file directly
+
+Use this when you want Reeple to receive the file directly as a multipart upload.
+
+```
+POST https://api-v3.reeple.ai/transfer/submit/source-of-funds/file
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `reference` | String | **Required.** Transaction reference or transaction ID for the pending transaction. |
+| `additionalInfo` | String | Optional context for the review team. |
+| `file` | File | **Required.** Supporting source-of-funds file. |
+
+## Currency support
+
+This endpoint isn't tied to a single currency — it applies to any transaction moved into a pending compliance review state.
+
+## KYC and AML requirements
+
+| Requirement | Applies | Notes |
+|---|---|---|
+| Transaction must exist | Yes | The supplied reference must resolve to a real transaction |
+| Transaction must be pending | Yes | Source-of-funds can only be submitted for transactions still in review |
+| Supporting evidence | Yes | A valid document URL or uploaded file is required |
+| Business authentication | Yes | The request is scoped to the authenticated business |

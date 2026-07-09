@@ -1,0 +1,29 @@
+---
+title: Internet services
+description: List available internet/data providers
+---
+
+List the internet (data) providers available for [Pay internet](/api-reference/bill-payment/pay-internet).
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/bill-payment/internet-services
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Internet services fetched",
+  "data": [
+    { "serviceCategoryId": "string", "name": "MTN", "identifier": "MTN", "isFixedAmount": true, "description": "Mtn Data Bundle", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "GLO", "identifier": "GLO", "isFixedAmount": true, "description": "Glo Data Bundle", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "AIRTEL", "identifier": "AIRTEL", "isFixedAmount": true, "description": "Airtel Data Bundle", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "ETISALAT", "identifier": "ETISALAT", "isFixedAmount": true, "description": "Etisalat Data Bundle", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "MTN-COOPERATE-DATA", "identifier": "MTN-DATA", "isFixedAmount": true, "description": "Mtn Data Bundle", "logoUrl": "logo url" }
+  ]
+}
+```

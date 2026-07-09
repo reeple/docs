@@ -1,0 +1,20 @@
+---
+title: Universities
+description: List universities you can pay tuition to, by country
+---
+
+List the universities you can pay tuition to through the Reeple API, for a given country.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/tuition/universities/{country}
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `country` | String | **Required.** The country to list universities for. |
+
+<Note>
+  This is a separate listing path from [Get universities](/api-reference/external-services/get-universities) (`GET /tuition/{country}/universities`) — both return university data by country; use whichever your integration already relies on.
+</Note>

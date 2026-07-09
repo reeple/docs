@@ -1,0 +1,34 @@
+---
+title: List data plans
+description: List available data bundle plans for a provider
+---
+
+List the data plans available for a given internet provider, before purchase.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/bill-payment/internet-services/{serviceCategoryId}
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `serviceCategoryId` | String | **Required.** The ID of the provider whose data plans you want — see [Internet services](/api-reference/bill-payment/internet-services). |
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Data plans fetched",
+  "data": [
+    { "validity": "1 month", "bundleCode": "MTN-2GB", "amount": "600.00", "isAmountFixed": true },
+    { "validity": "1 month", "bundleCode": "MTN-3GB", "amount": "900.00", "isAmountFixed": true },
+    { "validity": "1 month", "bundleCode": "MTN-5GB", "amount": "1500.00", "isAmountFixed": true },
+    { "validity": "1 month", "bundleCode": "MTN-500MB", "amount": "200.00", "isAmountFixed": true },
+    { "validity": "1 month", "bundleCode": "MTN-10GB", "amount": "3000.00", "isAmountFixed": true },
+    { "validity": "1 month", "bundleCode": "MTN-1GB", "amount": "300.00", "isAmountFixed": true }
+  ]
+}
+```

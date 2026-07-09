@@ -1,0 +1,106 @@
+---
+title: Create payment link
+description: Generate a hosted payment link for a checkout
+---
+
+Generate a secure, hosted payment link. This is useful for e-commerce platforms, service providers, and any business that needs a full payment gateway integration without building its own checkout UI.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/payments/create/link
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `amount` | Number `>= 1` | **Required.** Amount to charge, in the currency's standard unit. |
+| `currency` | Object (`CurrencyDto`) | **Required.** See [Currency object](#currency-object) below. |
+| `name` | String | **Required.** Name of the individual or business initiating the payment. |
+| `acceptOtherCurrencies` | Boolean, default `false` | Whether the transaction can accept currencies other than the one specified. |
+| `callbackUrl` | String | URL Reeple sends a notification to after the payment is processed. |
+| `channels` | Array of strings | Payment channels to allow, e.g. `BANK_TRANSFER`, `CARD`, `SHIGA_QR`, `BANK`. |
+| `description` | String | Description of the transaction. |
+| `logoUrl` | String | URL for a logo to show on the checkout page. |
+| `reference` | String | Your own reference for tracking. |
+
+### Currency object
+
+```json
+{
+  "value": "NGN",
+  "type": "FIXED"
+}
+```
+
+## Supported currencies
+
+Payment links support: Cameroon, Equatorial Guinea, Gabon, Chad, Ivory Coast, Egypt, Ghana, Kenya, Morocco, Nigeria, Rwanda, Senegal, South Africa, Tanzania, and Uganda (by their respective currency codes — see [supported currencies](/currencies)).
+
+## Request example
+
+```json
+{
+  "description": "string",
+  "reference": "string",
+  "amount": 1,
+  "currency": {
+    "value": "NGN",
+    "type": "FIXED"
+  },
+  "channels": ["BANK_TRANSFER", "CARD", "SHIGA_QR", "BANK"],
+  "name": "string",
+  "callbackUrl": "https://yoursite.com/payment/callback",
+  "logoUrl": "https://yoursite.com/logo.png",
+  "acceptOtherCurrencies": false
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Payment link created successfully",
+  "url": "https://pay.reeple.ai/xxxxxxxx"
+}
+```
+
+## Card Auth Codes (recurring payments)
+
+Refunds on card payments are handled by Reeple — you don't need to process them yourself. To turn any payment-link request into a Card Auth Request, add `"recurring": true` to the payload.
+
+| Requirement | Details |
+|---|---|
+| Minimum USD | 1 |
+| Minimum NGN | 50 |
+| Supported cards | USD and NGN only |
+| Customer data | `customer` object must be provided |
+
+```json
+{
+  "name": "Acme Inc",
+  "description": "this is desc",
+  "customer": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@email.com",
+    "phoneNumber": "+2347065789997"
+  },
+  "amount": 1,
+  "currency": {
+    "value": "USD",
+    "type": "FIXED"
+  },
+  "channels": ["CARD"],
+  "callbackUrl": "https://yoursite.com/payment/callback",
+  "logoUrl": "https://yoursite.com/logo.png",
+  "recurring": true
+}
+```
+
+<Tip>
+  For test card numbers to use with the `CARD` channel, see [Sandbox / Testing](/sandbox-testing) or contact Reeple.
+</Tip>

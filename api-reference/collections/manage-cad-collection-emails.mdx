@@ -1,0 +1,52 @@
+---
+title: Manage CAD collection emails
+description: Register the sender emails Reeple should use to auto-reconcile CAD collections
+---
+
+Manage the CAD collection email addresses Reeple uses to automatically identify the owner of an incoming CAD collection. When a CAD collection webhook is received, Reeple checks the incoming sender's email against the emails you've registered here — if a match is found, Reeple reconciles the collection automatically and credits your CAD wallet. If no match is found, Reeple falls back to your business email on Reeple; if that also fails, the collection is deferred to the [CAD claim flow](/api-reference/collections/claim-cad-collection).
+
+## Add a CAD collection email
+
+```
+POST https://api-v3.reeple.ai/business/settings/cad-collection-emails
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `email` | String | **Required.** The CAD collection email you want Reeple to use for automatic reconciliation. |
+
+```json
+{
+  "email": "cad-collections@merchant.com"
+}
+```
+
+<Note>
+  A CAD collection email can only belong to one business. Use the exact email address that appears as the incoming CAD collection sender in the webhook source information.
+</Note>
+
+## List CAD collection emails
+
+```
+GET https://api-v3.reeple.ai/business/settings/cad-collection-emails
+```
+
+Returns the CAD collection emails currently registered for your business.
+
+## Delete a CAD collection email
+
+```
+DELETE https://api-v3.reeple.ai/business/settings/cad-collection-emails/:id
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | String | **Required.** The ID of the registered CAD collection email to remove. |
+
+## KYC and AML requirements
+
+| Requirement | Applies | Notes |
+|---|---|---|
+| Authenticated business account | Yes | These endpoints are business-authenticated |
+| Correct CAD collection email registration | Yes | Automatic CAD reconciliation depends on this mapping |
+| CAD wallet availability | Yes | Automatic settlement still requires an available CAD wallet |

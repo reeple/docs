@@ -1,0 +1,58 @@
+---
+title: List AML records
+description: List all AML records for your business
+---
+
+Returns a paginated list of AML records for your business. Each record represents a flagged transaction that requires, or has already received, source-of-funds review.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/aml
+```
+
+## Query parameters
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `status` | `PENDING` \| `PROOF_UPLOADED` \| `APPROVED` \| `REJECTED` | No | Filter records by status. |
+| `page` | String | No | Page number. Defaults to `1`. |
+| `limit` | String | No | Records per page. Defaults to `20`. |
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "aml_xxx",
+      "businessId": "biz_xxx",
+      "currency": "CAD",
+      "amount": 500.00,
+      "status": "PENDING",
+      "proofUrl": null,
+      "reviewNotes": null,
+      "createdAt": "2026-06-12T10:00:00.000Z",
+      "deposit": {
+        "id": "...",
+        "amount": 500,
+        "currency": "CAD",
+        "status": "PENDING",
+        "createdAt": "..."
+      },
+      "customer": {
+        "id": "...",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@example.com"
+      }
+    }
+  ],
+  "meta": {
+    "total": 1,
+    "page": 1,
+    "limit": 20,
+    "pages": 1
+  }
+}
+```

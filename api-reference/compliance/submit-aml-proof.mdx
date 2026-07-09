@@ -1,0 +1,38 @@
+---
+title: Submit AML proof
+description: Submit a proof document for an AML-flagged transaction
+---
+
+## Endpoint
+
+```
+PATCH https://api-v3.reeple.ai/aml/:id/proof
+```
+
+Submit a proof document for an AML-flagged transaction. Once submitted, the record status moves to `PROOF_UPLOADED` and an `aml.proof.submitted` webhook fires.
+
+<Note>
+  This endpoint only accepts submissions when the record status is `PENDING` or `PROOF_UPLOADED`. Submitting proof for a record that's already `APPROVED` or `REJECTED` returns a `400` error.
+</Note>
+
+## Request body
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `proofUrl` | String (URL) | Yes | URL of the uploaded proof document. |
+| `notes` | String | No | Any context you want to provide to the review team. |
+
+```json
+{
+  "proofUrl": "https://cdn.example.com/your-business/aml/proof.pdf",
+  "notes": "This is a salary payment from my employer"
+}
+```
+
+## Response
+
+Returns the updated AML record with `status: "PROOF_UPLOADED"`.
+
+## Webhook
+
+An `aml.proof.submitted` webhook event fires after a successful submission — see [Webhooks](/api-reference/webhooks).

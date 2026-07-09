@@ -1,0 +1,47 @@
+---
+title: Authentication
+description: How to authenticate server-side requests to the Reeple API
+---
+
+The API Reference in this section documents Reeple's server-side REST API, hosted at:
+
+```
+https://api-v3.reeple.ai
+```
+
+This is a separate surface from the [checkout SDK](/index) documented elsewhere in these docs. The SDK uses a `publicKey` (`pk_live_.../pk_test_...`) from the browser to open a checkout modal. This API uses a **secret key** (`sk_live_.../sk_test_...`) from your server to manage bank accounts, bill payments, payouts, transactions, and everything else covered in this section.
+
+## Obtaining your keys
+
+<Note>
+  Reeple doesn't currently offer self-service key generation. To get your public and secret keys, contact Reeple as part of onboarding.
+</Note>
+
+Keys are issued in matching pairs per environment — a `sk_test_...` secret key is only valid alongside a `pk_test_...` public key, and likewise for `sk_live_...` / `pk_live_...`. Don't mix a test key with a live one.
+
+## Authenticating a request
+
+Send your secret key in the `api-key` header on every request:
+
+```bash
+curl -X GET https://api-v3.reeple.ai/transactions \
+  -H "Content-Type: application/json" \
+  -H "api-key: YOUR_SECRET_KEY"
+```
+
+<Warning>
+  Your secret key grants full access to your account's financial data and operations. Keep it server-side only — never expose it in client-side code, mobile apps, or public repositories. Always call this API over HTTPS.
+</Warning>
+
+If you suspect a secret key has been compromised, contact Reeple immediately to have it rotated. Once a key is rotated, the old one stops working right away, so update your servers before requesting a rotation.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" href="/api-reference/webhooks">
+    Get notified in real time as your transactions change status.
+  </Card>
+  <Card title="Errors" href="/api-reference/errors">
+    Common error shapes returned across this API.
+  </Card>
+</CardGroup>

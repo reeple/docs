@@ -1,0 +1,35 @@
+---
+title: Electricity services
+description: List available electricity distribution companies
+---
+
+List the electricity providers (discos) available for validation and bill payment.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/bill-payment/electricity-services
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Electricity services fetched",
+  "data": [
+    { "serviceCategoryId": "string", "name": "BEDC", "identifier": "BENIN", "isFixedAmount": false, "description": "Benin Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "EKEDC", "identifier": "EKO", "isFixedAmount": false, "description": "Eko Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "AEDC", "identifier": "ABUJA", "isFixedAmount": false, "description": "Abuja Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "EEDC", "identifier": "ENUGU", "isFixedAmount": false, "description": "Enugu Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "IBEDC", "identifier": "IBADAN", "isFixedAmount": false, "description": "Ibadan Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "IKEDC", "identifier": "IKEJA", "isFixedAmount": false, "description": "Ikeja Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "JEDC", "identifier": "JOS", "isFixedAmount": false, "description": "JOS Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "KAEDC", "identifier": "KADUNA", "isFixedAmount": false, "description": "Kaduna Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "KEDCO", "identifier": "KANO", "isFixedAmount": false, "description": "Kano Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "61e98d28ab69182f326e6dc2", "name": "PHEDC", "identifier": "PORTHARCOURT", "isFixedAmount": false, "description": "PortHarcourt Electricity Distribution Company", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "YEDC", "identifier": "YOLA", "isFixedAmount": false, "description": "Yola Electricity distribution company", "logoUrl": "logo url" }
+  ]
+}
+```

@@ -1,0 +1,42 @@
+---
+title: Currency data
+description: List all currencies supported by Reeple
+---
+
+Get details on all currencies available on Reeple.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/currencies
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Currency data fetched",
+  "data": [
+    {
+      "id": 3,
+      "icon": "https://cdn.example.com/country-logo/GBP.svg",
+      "currency": "GBP",
+      "countryCode": "GB",
+      "name": "British Pound",
+      "country": "United Kingdom",
+      "symbol": "£"
+    },
+    {
+      "id": 1,
+      "icon": "https://cdn.example.com/country-logo/USD.svg",
+      "currency": "USD",
+      "countryCode": "US",
+      "name": "US Dollars",
+      "country": "United States of America",
+      "symbol": "$"
+    }
+  ]
+}
+```

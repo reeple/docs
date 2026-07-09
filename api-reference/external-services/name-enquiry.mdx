@@ -1,0 +1,49 @@
+---
+title: Name enquiry
+description: Resolve the account holder's name for a Nigerian bank account
+---
+
+Resolve the account holder's name for a Nigerian bank account before initiating a transfer.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/ng-bank/name-enquiry
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `accountNumber` | String | **Required.** The bank account number to resolve. |
+| `currency` | String | **Required.** `NGN`. |
+| `bankCode` | String | **Required.** Code identifying the bank — see [Get banks](/api-reference/external-services/get-banks). |
+
+```json
+{
+  "currency": "NGN",
+  "accountNumber": "string",
+  "bankCode": "string"
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Name Enquired successfully",
+  "data": {
+    "sessionId": "string",
+    "accountNumber": "string",
+    "accountName": "string",
+    "bankCode": "string",
+    "bankName": "string"
+  }
+}
+```
+
+<Note>
+  `sessionId` is only returned when the provider is `NGN-1`.
+</Note>

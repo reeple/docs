@@ -1,0 +1,56 @@
+---
+title: Airtime services
+description: List available airtime providers
+---
+
+List the airtime providers available for [Pay airtime](/api-reference/bill-payment/pay-airtime).
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/bill-payment/airtime-services
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Airtime services fetched",
+  "data": [
+    {
+      "serviceCategoryId": "string",
+      "name": "MTN",
+      "identifier": "MTN",
+      "isFixedAmount": false,
+      "description": "Mtn Airtime",
+      "logoUrl": "logo url"
+    },
+    {
+      "serviceCategoryId": "string",
+      "name": "GLO",
+      "identifier": "GLO",
+      "isFixedAmount": false,
+      "description": "Glo Airtime",
+      "logoUrl": "logo url"
+    },
+    {
+      "serviceCategoryId": "string",
+      "name": "AIRTEL",
+      "identifier": "AIRTEL",
+      "isFixedAmount": false,
+      "description": "Airtel Airtime",
+      "logoUrl": "logo url"
+    },
+    {
+      "serviceCategoryId": "string",
+      "name": "ETISALAT",
+      "identifier": "ETISALAT",
+      "isFixedAmount": false,
+      "description": "Etisalat Airtime",
+      "logoUrl": "logo url"
+    }
+  ]
+}
+```

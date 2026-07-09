@@ -1,0 +1,48 @@
+---
+title: Validate electricity
+description: Confirm a meter number before payment
+---
+
+Confirm that a meter number is valid and active before paying, to reduce the risk of misdirected payments.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/bill-payment/validate-electricity
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `serviceCategoryId` | String | **Required.** The ID of the electricity provider — see [Electricity services](/api-reference/bill-payment/electricity-services). |
+| `entityNumber` | String | **Required.** The meter number to validate. |
+
+```json
+{
+  "serviceCategoryId": "string",
+  "entityNumber": "Your electricity account code"
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Electricity validation successful",
+  "data": {
+    "discoCode": "string e.g IBADAN",
+    "vendType": "POSTPAID",
+    "meterNo": "903398146101",
+    "minVendAmount": 500,
+    "maxVendAmount": 10000000,
+    "outstanding": 0,
+    "debtRepayment": 0,
+    "name": "Name on the bill",
+    "address": "Address on the bill",
+    "orderId": "Your order id"
+  }
+}
+```

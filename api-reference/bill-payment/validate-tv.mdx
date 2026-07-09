@@ -1,0 +1,41 @@
+---
+title: Validate TV
+description: Confirm a cable TV account before payment
+---
+
+Check a cable TV account's validity and subscription status before paying.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/bill-payment/validate-tv
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `serviceCategoryId` | String | **Required.** The ID of the TV provider — see [TV services](/api-reference/bill-payment/tv-services). |
+| `entityNumber` | String | **Required.** The TV account (smartcard/IUC) number. |
+
+```json
+{
+  "serviceCategoryId": "string",
+  "entityNumber": "string"
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "TV validation successful",
+  "data": {
+    "status": "success",
+    "name": "Owner's name",
+    "customernumber": "string"
+  }
+}
+```

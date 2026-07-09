@@ -1,0 +1,28 @@
+---
+title: Pay TV bill
+description: Buy a cable TV subscription package
+---
+
+Buy a cable TV subscription package through the Reeple API. The amount is disbursed directly from your available balance.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/bill-payment/tv/pay
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `serviceCategoryId` | String | **Required.** The ID of the selected cable provider. |
+| `cardNumber` | String | **Required.** The TV account (smartcard/IUC) number. |
+| `bundleCode` | String | **Required.** Identifier of the selected package — see [List TV packages](/api-reference/bill-payment/list-tv-packages). |
+
+```json
+{
+  "serviceCategoryId": "string",
+  "bundleCode": "string",
+  "cardNumber": "string"
+}
+```

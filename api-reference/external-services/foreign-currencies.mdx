@@ -1,0 +1,51 @@
+---
+title: Foreign currencies
+description: List only foreign (non-local) currencies
+---
+
+Get a list of foreign currencies only.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/currencies/foreign
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Foreign currencies fetched",
+  "data": [
+    {
+      "id": 1,
+      "icon": "https://cdn.example.com/country-logo/USD.svg",
+      "currency": "USD",
+      "countryCode": "US",
+      "name": "US Dollars",
+      "country": "United States of America",
+      "symbol": "$"
+    },
+    {
+      "id": 3,
+      "icon": "https://cdn.example.com/country-logo/GBP.svg",
+      "currency": "GBP",
+      "countryCode": "GB",
+      "name": "British Pound",
+      "country": "United Kingdom",
+      "symbol": "£"
+    },
+    {
+      "id": 4,
+      "icon": "https://cdn.example.com/country-logo/EUR.svg",
+      "currency": "EUR",
+      "countryCode": "EU",
+      "name": "Euro",
+      "country": "Germany",
+      "symbol": "€"
+    }
+  ]
+}
+```

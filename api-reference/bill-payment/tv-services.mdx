@@ -1,0 +1,27 @@
+---
+title: TV services
+description: List available cable TV providers
+---
+
+List the cable TV providers available for validation and bill payment.
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/bill-payment/tv-services
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "TV services fetched",
+  "data": [
+    { "serviceCategoryId": "string", "name": "DSTV BILL", "identifier": "DSTV", "isFixedAmount": true, "description": "DSTV Bundle", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "GOTV", "identifier": "GOTV", "isFixedAmount": true, "description": "GOTV Package", "logoUrl": "logo url" },
+    { "serviceCategoryId": "string", "name": "STARTIMES", "identifier": "STARTIMES", "isFixedAmount": true, "description": "STARTIMES Package", "logoUrl": "logo url" }
+  ]
+}
+```

@@ -1,0 +1,80 @@
+---
+title: Claim CAD collection
+description: Claim a recorded CAD collection when automatic reconciliation couldn't identify the owner
+---
+
+Use this endpoint when a CAD collection has already been received by Reeple, but automatic reconciliation couldn't confidently determine which business wallet to credit.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/deposits/cad/claim
+```
+
+## Currency support
+
+| Currency | Supported |
+|---|---|
+| `CAD` | Yes |
+
+This endpoint only applies to the CAD claim-based collection flow.
+
+## When this endpoint is used
+
+Reeple only defers a CAD collection to claim after automatic reconciliation fails. For successful CAD collections, Reeple first tries to identify the owner in this order:
+
+1. Match the sender email to a CAD collection email registered by the business.
+2. If no match, match the same incoming collection email to the business email on Reeple.
+3. If both checks fail, the collection is stored and becomes eligible for claim through this endpoint.
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `transactionReference` | String | **Required.** The transaction reference of the recorded CAD collection you want to claim. |
+| `senderEmail` | String | **Required.** The sender email recorded against that CAD collection. |
+
+```json
+{
+  "transactionReference": "90980e50-0b83-40a6-aa46-ac8e795b1acd",
+  "senderEmail": "sender@example.com"
+}
+```
+
+## How it works
+
+1. Reeple looks up the stored CAD inflow using the supplied `transactionReference` and `senderEmail`.
+2. If a valid, unclaimed record is found, Reeple reconciles it to your business.
+3. Reeple creates the internal deposit record and credits your CAD wallet.
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "CAD collection claimed successfully",
+  "data": {
+    "id": "deposit-id",
+    "status": "SUCCESSFUL",
+    "currency": "CAD"
+  }
+}
+```
+
+## KYC and AML requirements
+
+| Requirement | Applies | Notes |
+|---|---|---|
+| Authenticated business account | Yes | The claim is processed for the business making the request |
+| CAD wallet availability | Yes | Reeple must be able to credit your CAD wallet |
+| Exact claim details | Yes | `transactionReference` and `senderEmail` must match the stored CAD collection record |
+| Additional review | Possible | If the collection isn't in a claimable state, credit may not proceed |
+
+## Common errors
+
+| Status | Meaning |
+|---|---|
+| `404` | No stored CAD collection matched the supplied `transactionReference` and `senderEmail` |
+| `400` | The CAD collection has already been claimed |
+| `400` | The CAD collection isn't currently claimable |

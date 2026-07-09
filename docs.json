@@ -13,38 +13,158 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Get Started",
-        "pages": ["index", "quickstart"]
-      },
-      {
-        "group": "Integration Guide",
-        "pages": [
-          "configuration",
-          "callbacks-and-verification",
-          "currencies",
-          "sandbox-testing"
+        "tab": "SDK",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["index", "quickstart"]
+          },
+          {
+            "group": "Integration Guide",
+            "pages": [
+              "configuration",
+              "callbacks-and-verification",
+              "currencies",
+              "sandbox-testing"
+            ]
+          },
+          {
+            "group": "Framework Examples",
+            "pages": [
+              "examples/vanilla-js",
+              "examples/react",
+              "examples/nextjs",
+              "examples/vue",
+              "examples/angular",
+              "examples/svelte"
+            ]
+          },
+          {
+            "group": "Mobile",
+            "pages": ["examples/react-native", "examples/flutter"]
+          },
+          {
+            "group": "Help",
+            "pages": ["troubleshooting"]
+          }
         ]
       },
       {
-        "group": "Framework Examples",
-        "pages": [
-          "examples/vanilla-js",
-          "examples/react",
-          "examples/nextjs",
-          "examples/vue",
-          "examples/angular",
-          "examples/svelte"
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "api-reference/authentication",
+              "api-reference/webhooks",
+              "api-reference/errors"
+            ]
+          },
+          {
+            "group": "Bank Accounts",
+            "pages": [
+              "api-reference/bank-account/create-ngn-bank-account",
+              "api-reference/bank-account/create-multi-currency-bank-account",
+              "api-reference/bank-account/get-bank-account",
+              "api-reference/bank-account/list-bank-accounts"
+            ]
+          },
+          {
+            "group": "Bill Payments",
+            "pages": [
+              "api-reference/bill-payment/airtime-services",
+              "api-reference/bill-payment/pay-airtime",
+              "api-reference/bill-payment/electricity-services",
+              "api-reference/bill-payment/validate-electricity",
+              "api-reference/bill-payment/pay-electricity-bill",
+              "api-reference/bill-payment/internet-services",
+              "api-reference/bill-payment/list-data-plans",
+              "api-reference/bill-payment/pay-internet",
+              "api-reference/bill-payment/tv-services",
+              "api-reference/bill-payment/validate-tv",
+              "api-reference/bill-payment/list-tv-packages",
+              "api-reference/bill-payment/pay-tv-bill",
+              "api-reference/bill-payment/payment-history"
+            ]
+          },
+          {
+            "group": "Collections",
+            "pages": [
+              "api-reference/collections/overview",
+              "api-reference/collections/manage-cad-collection-emails",
+              "api-reference/collections/claim-cad-collection"
+            ]
+          },
+          {
+            "group": "Compliance",
+            "pages": [
+              "api-reference/compliance/overview",
+              "api-reference/compliance/get-aml-record",
+              "api-reference/compliance/list-aml-records",
+              "api-reference/compliance/submit-aml-proof",
+              "api-reference/compliance/submit-source-of-funds"
+            ]
+          },
+          {
+            "group": "Customer",
+            "pages": ["api-reference/customer/attach-kyc"]
+          },
+          {
+            "group": "External Services",
+            "pages": [
+              "api-reference/external-services/name-enquiry",
+              "api-reference/external-services/get-banks",
+              "api-reference/external-services/get-universities",
+              "api-reference/external-services/currency-data",
+              "api-reference/external-services/foreign-currencies",
+              "api-reference/external-services/get-currency-pairs",
+              "api-reference/external-services/generate-currency-quote"
+            ]
+          },
+          {
+            "group": "Gift Cards",
+            "pages": [
+              "api-reference/giftcards/list-all-giftcards",
+              "api-reference/giftcards/get-giftcards",
+              "api-reference/giftcards/order-giftcards"
+            ]
+          },
+          {
+            "group": "Payment Links",
+            "pages": ["api-reference/payment-link/create-payment-link"]
+          },
+          {
+            "group": "Payouts",
+            "pages": [
+              "api-reference/payouts/overview",
+              "api-reference/payouts/initiate-payout"
+            ]
+          },
+          {
+            "group": "Refunds",
+            "pages": [
+              "api-reference/refunds/list-refunds",
+              "api-reference/refunds/create-refund"
+            ]
+          },
+          {
+            "group": "Transactions",
+            "pages": [
+              "api-reference/transactions/list-transactions",
+              "api-reference/transactions/get-transaction-by-reference"
+            ]
+          },
+          {
+            "group": "Tuition",
+            "pages": [
+              "api-reference/tuition/overview",
+              "api-reference/tuition/create-tuition",
+              "api-reference/tuition/universities"
+            ]
+          }
         ]
-      },
-      {
-        "group": "Mobile",
-        "pages": ["examples/react-native", "examples/flutter"]
-      },
-      {
-        "group": "Help",
-        "pages": ["troubleshooting"]
       }
     ]
   },

@@ -1,0 +1,29 @@
+---
+title: Pay airtime
+description: Buy airtime for a phone number
+---
+
+Buy airtime through the Reeple API. The amount is disbursed directly from your available balance.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/bill-payment/airtime/pay
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `serviceCategoryId` | String | **Required.** The `serviceCategoryId` of the selected provider — see [Airtime services](/api-reference/bill-payment/airtime-services). |
+| `amount` | Number `>= 1` | **Required.** Amount to load onto the target number. |
+| `phoneNumber` | String | **Required.** 11-digit target phone number. |
+| `reference` | String | Optional identifier you can attach to the transaction. |
+
+```json
+{
+  "serviceCategoryId": "string",
+  "amount": 200,
+  "phoneNumber": "080xxxxxxxx"
+}
+```

@@ -1,0 +1,135 @@
+---
+title: Create tuition
+description: Initiate a tuition payment to a university
+---
+
+Once you've resolved a target country and university, initiate the tuition payment.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/tuitions/create
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `amount` | Number `>= 2000` | **Required.** Amount to pay. |
+| `country` | String | **Required.** Country where the university is located. |
+| `currency` | String | **Required.** Currency for the payment. |
+| `student` | Object (`CreateBeneficiaryDto`) | **Required.** Details of the tuition payment's beneficiary. |
+| `type` | Enum `SCHOOL` \| `ACCOMODATION` | **Required.** Transaction type. |
+| `university` | Object (`UniversityDto`) | **Required.** The target university. |
+| `address` | String | Address of the person paying the tuition. |
+| `reference` | String | Your unique identifier for this request. |
+| `saveStudent` | Boolean | Whether to save the student's information for future use. |
+
+## Currency support
+
+| Currency | Supported | Notes |
+|---|---|---|
+| `GBP` | Yes | Uses a dedicated tuition payout path with institution validation and education-purpose routing |
+| Other configured tuition currencies | Yes | Continue through the general tuition flow |
+
+## KYC and AML requirements
+
+| Requirement | Applies | Notes |
+|---|---|---|
+| Business wallet must be funded | Yes | The wallet must cover amount plus fee |
+| Institution details must be valid | Yes | Tuition validation happens before processing |
+| Education purpose | Required for `GBP` | GBP tuition is locked to education |
+| Provider confirmation | Asynchronous | Final status may arrive after the initial request, via webhook |
+
+```json
+{
+  "type": "SCHOOL",
+  "country": "string",
+  "university": {
+    "name": "string",
+    "accountName": "string",
+    "accountNumber": "string",
+    "accountBank": "string",
+    "accountType": "SAVINGS",
+    "sortCode": "string",
+    "iban": "string",
+    "swiftCode": "string",
+    "UCASNumber": "string",
+    "routingNumber": "string",
+    "postCode": "string",
+    "state": "string",
+    "city": "string"
+  },
+  "address": "string",
+  "amount": 2000,
+  "reference": "string",
+  "currency": "GBP",
+  "student": {
+    "reference": "string",
+    "email": "string",
+    "firstName": "string",
+    "lastName": "string",
+    "middleName": "string",
+    "invoiceNumber": "string",
+    "address": "string",
+    "note": "string"
+  },
+  "saveStudent": true
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Tuition created successfully",
+  "data": {
+    "id": "d68c05d7-854a-4fb8-8f44-3dac7fd38ecc",
+    "country": "GB",
+    "university": {
+      "iban": "123211",
+      "name": "University of London",
+      "sortCode": "3737378",
+      "swiftCode": "2928282",
+      "UCASNumber": "ejhbe873bd83be93y36v",
+      "accountName": "Example bank of GB",
+      "accountType": "SAVINGS",
+      "accountNumber": "37383837329"
+    },
+    "createdAt": "2024-04-25T06:22:48.443Z",
+    "updatedAt": "2024-04-25T06:22:50.361Z",
+    "deletedAt": null,
+    "type": "SCHOOL",
+    "currency": "GBP",
+    "studentId": "e6372fea-5943-479a-a12a-f4b4fdaeb0ab",
+    "businessId": "0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e",
+    "reference": "reeple_business_12345",
+    "transaction": {
+      "id": "4945bf9f-68bc-4e0b-988f-7c71821895a6",
+      "amount": 1000,
+      "status": "PENDING",
+      "fee": 0,
+      "description": "Tuition",
+      "type": "CREDIT",
+      "medium": "API",
+      "method": null,
+      "currency": "GBP",
+      "createdAt": "2024-04-25T06:22:48.443Z",
+      "updatedAt": "2024-04-25T06:22:48.443Z",
+      "businessId": "0bb1dfc6-a74c-4e53-b41a-4a0c1eab188e",
+      "reference": "rep_tr_7ca4294c-36c9-42cf-8eb4-349a4dfe8d09",
+      "depositId": null,
+      "spendingId": null,
+      "refundId": null,
+      "topupId": null,
+      "tuitionId": "d68c05d7-854a-4fb8-8f44-3dac7fd38ecc",
+      "walletId": null,
+      "cardId": null,
+      "swapId": null,
+      "balance": null
+    }
+  }
+}
+```
