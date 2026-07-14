@@ -1,0 +1,80 @@
+---
+title: Initiate a payment order
+description: Create a payment order to track or charge server-to-server
+---
+
+Create a payment order. This is the first step for the [`/initiate` + `/charge`](/api-reference/s2s-payments/overview#choosing-a-flow) integration path — authenticate with the `public-key` header described in the [S2S Payments overview](/api-reference/s2s-payments/overview#authentication).
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/s2s/payments/initiate
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `amount` | Number `>= 1` | **Required.** Amount to charge, in the currency's standard unit. |
+| `currency` | String | **Required.** See [Supported currencies](/currencies). |
+| `customer` | Object (`PaymentCustomerDto`) | **Required.** See [Customer object](#customer-object) below. |
+| `meta` | Object | **Required.** Additional information about the payment. |
+| `narration` | String | **Required.** Description of the transaction. |
+| `callbackUrl` | String | Optional. URL to redirect the customer to after payment. |
+| `deviceId` | String | Optional. Forwarded to fraud detection. |
+| `ip` | String | Optional. Forwarded to fraud detection. |
+| `reference` | String | Optional. Your own idempotency key; Reeple generates one if omitted. |
+| `userAgent` | String | Optional. Forwarded to fraud detection. |
+
+### Customer object
+
+| Field | Type | Description |
+|---|---|---|
+| `email` | String | **Required.** |
+| `firstName` | String | **Required.** |
+| `lastName` | String | **Required.** |
+| `phoneNumber` | String | **Required.** |
+
+## Request example
+
+```json
+{
+  "currency": "NGN",
+  "reference": "string",
+  "narration": "string",
+  "meta": {},
+  "callbackUrl": "string",
+  "ip": "string",
+  "deviceId": "string",
+  "userAgent": "string",
+  "customer": {
+    "firstName": "string",
+    "lastName": "string",
+    "email": "string",
+    "phoneNumber": "string"
+  },
+  "amount": 1
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Payment order initiated successfully",
+  "data": {
+    "status": "pending",
+    "reference": "PSH_7A1B2C3D4E",
+    "amount": 2500,
+    "currency": "NGN"
+  }
+}
+```
+
+<Tip>
+  See [Errors](/api-reference/errors) for the shape of `401`/`500` responses.
+</Tip>
+
+Use the `reference` from the response to check status later via [Verify a payment order](/api-reference/s2s-payments/verify-payment).

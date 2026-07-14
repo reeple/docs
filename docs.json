@@ -150,6 +150,16 @@
             ]
           },
           {
+            "group": "S2S Payments",
+            "pages": [
+              "api-reference/s2s-payments/overview",
+              "api-reference/s2s-payments/initiate-payment",
+              "api-reference/s2s-payments/create-checkout-link",
+              "api-reference/s2s-payments/charge-card",
+              "api-reference/s2s-payments/verify-payment"
+            ]
+          },
+          {
             "group": "Transactions",
             "pages": [
               "api-reference/transactions/list-transactions",

@@ -1,0 +1,41 @@
+---
+title: S2S Payments overview
+description: Server-to-server payment endpoints, public-key authentication, and choosing between hosted checkout and direct card charge
+---
+
+S2S Payments lets you create, collect, and verify payments directly against Reeple's server-to-server API — as opposed to the client-side [checkout SDK](/index) covered elsewhere in these docs. Payment orders created through any of these endpoints share a common `reference` format (e.g. `PSH_7A1B2C3D4E`) that you use to track and verify them.
+
+## Authentication
+
+These endpoints send your dashboard **public key** (`pk_live_.../pk_test_...`) in a `public-key` header — not the secret-key `api-key` scheme used by the rest of this API reference. See [Authentication](/api-reference/authentication) for how the rest of the API differs.
+
+```bash
+curl -X POST https://api-v3.reeple.ai/s2s/payments/initiate \
+  -H "Content-Type: application/json" \
+  -H "public-key: YOUR_PUBLIC_KEY" \
+  -d '{ ... }'
+```
+
+## Choosing a flow
+
+| | `/checkout` | `/initiate` + `/charge` |
+|---|---|---|
+| Card data handling | Reeple-hosted page | Your server (requires AES-256-GCM encryption) |
+| PCI scope | Reduced | Higher |
+| UX | Redirect to Reeple | Fully embedded |
+
+- Use [Create a hosted checkout link](/api-reference/s2s-payments/create-checkout-link) when you want the fastest integration with reduced PCI scope — Reeple's hosted page handles card entry, OTP, and 3DS.
+- Use [Initiate a payment order](/api-reference/s2s-payments/initiate-payment) followed by [Charge a card (S2S)](/api-reference/s2s-payments/charge-card) when you need a fully embedded card form and are prepared to encrypt card data yourself.
+
+## Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/s2s/payments/initiate` | [Create a payment order](/api-reference/s2s-payments/initiate-payment) |
+| `POST` | `/s2s/payments/checkout` | [Create a hosted checkout link](/api-reference/s2s-payments/create-checkout-link) |
+| `POST` | `/s2s/payments/charge` | [Charge a card server-to-server](/api-reference/s2s-payments/charge-card) |
+| `GET` | `/s2s/payments/verify/{reference}` | [Verify a payment order](/api-reference/s2s-payments/verify-payment) |
+
+## Supported currencies
+
+S2S Payments supports the same 21 currencies as the rest of the API — see [Supported currencies](/currencies).

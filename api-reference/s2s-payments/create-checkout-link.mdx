@@ -1,0 +1,99 @@
+---
+title: Create a hosted checkout link
+description: Create a payment order and get a hosted checkout URL to redirect your customer to
+---
+
+Creates a payment order and returns a hosted checkout URL to redirect the customer to — no card encryption required on your side.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/s2s/payments/checkout
+```
+
+## Flow
+
+<Steps>
+  <Step title="Create the checkout link">
+    `POST /s2s/payments/checkout` with customer and amount details.
+  </Step>
+  <Step title="Receive the checkout URL">
+    The response includes a `checkoutUrl`.
+  </Step>
+  <Step title="Redirect the customer">
+    Send the customer to `checkoutUrl`. Reeple's hosted checkout page handles card entry, OTP, and 3DS authentication.
+  </Step>
+  <Step title="Confirm the outcome">
+    After payment, the customer is redirected to your `callbackUrl` (if provided). Poll [Verify a payment order](/api-reference/s2s-payments/verify-payment) or listen for a [webhook](/api-reference/webhooks) to confirm the final status.
+  </Step>
+</Steps>
+
+## Request body
+
+Same shape as [Initiate a payment order](/api-reference/s2s-payments/initiate-payment).
+
+| Field | Type | Description |
+|---|---|---|
+| `amount` | Number `>= 1` | **Required.** Amount to charge, in the currency's standard unit. |
+| `currency` | String | **Required.** See [Supported currencies](/currencies). |
+| `customer` | Object (`PaymentCustomerDto`) | **Required.** `email`, `firstName`, `lastName`, `phoneNumber` — all required. |
+| `meta` | Object | **Required.** Additional information about the payment. |
+| `narration` | String | **Required.** Description of the transaction. |
+| `callbackUrl` | String | Optional. Where to redirect the customer after payment completes. If omitted, the checkout page shows a success/failure screen with no redirect. |
+| `deviceId` | String | Optional. Forwarded to fraud detection. |
+| `ip` | String | Optional. Forwarded to fraud detection. |
+| `reference` | String | Optional. Supply your own idempotency key; Reeple generates one if omitted. |
+| `userAgent` | String | Optional. Forwarded to fraud detection. |
+
+## Request example
+
+```json
+{
+  "currency": "NGN",
+  "reference": "string",
+  "narration": "string",
+  "meta": {},
+  "callbackUrl": "string",
+  "ip": "string",
+  "deviceId": "string",
+  "userAgent": "string",
+  "customer": {
+    "firstName": "string",
+    "lastName": "string",
+    "email": "string",
+    "phoneNumber": "string"
+  },
+  "amount": 1
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Checkout link created successfully",
+  "data": {
+    "status": "pending",
+    "reference": "PSH_7A1B2C3D4E",
+    "checkoutUrl": "https://pay.reeple.ai/pay/PSH_7A1B2C3D4E",
+    "amount": 2500,
+    "currency": "NGN"
+  }
+}
+```
+
+### Response fields
+
+| Field | Description |
+|---|---|
+| `reference` | Unique payment reference — use this to verify status. |
+| `checkoutUrl` | Redirect your customer to this URL to complete payment. |
+| `amount` | Amount in minor units as passed in the request. |
+| `currency` | Currency as passed in the request. |
+| `status` | Always `pending` at creation. |
+
+<Tip>
+  See [Errors](/api-reference/errors) for the shape of `401`/`500` responses.
+</Tip>

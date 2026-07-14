@@ -1,0 +1,55 @@
+---
+title: Verify a payment order
+description: Check the status of a payment order by its reference
+---
+
+Verify the status of any payment order created via [initiate](/api-reference/s2s-payments/initiate-payment), [checkout](/api-reference/s2s-payments/create-checkout-link), or [charge](/api-reference/s2s-payments/charge-card).
+
+## Endpoint
+
+```
+GET https://api-v3.reeple.ai/s2s/payments/verify/{reference}
+```
+
+## Path parameters
+
+| Param | Type | Description |
+|---|---|---|
+| `reference` | String | **Required.** The reference of the payment order, e.g. `PSH_7A1B2C3D4E`. |
+
+## Request example
+
+```bash
+curl -X GET https://api-v3.reeple.ai/s2s/payments/verify/PSH_7A1B2C3D4E \
+  -H "public-key: YOUR_PUBLIC_KEY"
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Payment order verified successfully",
+  "data": {
+    "status": "pending",
+    "reference": "PSH_7A1B2C3D4E",
+    "amount": 2500,
+    "currency": "NGN"
+  }
+}
+```
+
+`data.status` is one of `pending`, `success`, or `failed`.
+
+<Tip>
+  This is the same endpoint used in the [callback verification flow](/callbacks-and-verification).
+</Tip>
+
+<Note>
+  A `400` on this endpoint specifically means the payment order wasn't found.
+</Note>
+
+<Tip>
+  See [Errors](/api-reference/errors) for the shape of `401`/`500` responses.
+</Tip>

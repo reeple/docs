@@ -9,7 +9,11 @@ The API Reference in this section documents Reeple's server-side REST API, hoste
 https://api-v3.reeple.ai
 ```
 
-This is a separate surface from the [checkout SDK](/index) documented elsewhere in these docs. The SDK uses a `publicKey` (`pk_live_.../pk_test_...`) from the browser to open a checkout modal. This API uses a **secret key** (`sk_live_.../sk_test_...`) from your server to manage bank accounts, bill payments, payouts, transactions, and everything else covered in this section.
+This is a separate surface from the [checkout SDK](/index) documented elsewhere in these docs. The SDK uses a `publicKey` (`pk_live_.../pk_test_...`) from the browser to open a checkout modal. This API uses a **secret key** (`sk_live_.../sk_test_...`) from your server to manage bank accounts, bill payments, payouts, transactions, and most other operations covered in this section.
+
+<Note>
+  [S2S Payments](/api-reference/s2s-payments/overview) is the one exception: those endpoints authenticate with your dashboard **public key** (`pk_live_.../pk_test_...`) in a `public-key` header, not the secret-key `api-key` scheme described below. See the [S2S Payments overview](/api-reference/s2s-payments/overview#authentication) for details.
+</Note>
 
 ## Obtaining your keys
 

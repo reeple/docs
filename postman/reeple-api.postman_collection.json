@@ -1303,6 +1303,160 @@
       ]
     },
     {
+      "name": "S2S Payments",
+      "auth": {
+        "type": "apikey",
+        "apikey": [
+          {
+            "key": "key",
+            "value": "public-key",
+            "type": "string"
+          },
+          {
+            "key": "value",
+            "value": "{{publicKey}}",
+            "type": "string"
+          },
+          {
+            "key": "in",
+            "value": "header",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Initiate a payment order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"NGN\",\n  \"reference\": \"string\",\n  \"narration\": \"string\",\n  \"meta\": {},\n  \"callbackUrl\": \"string\",\n  \"ip\": \"string\",\n  \"deviceId\": \"string\",\n  \"userAgent\": \"string\",\n  \"customer\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"email\": \"string\",\n    \"phoneNumber\": \"string\"\n  },\n  \"amount\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/s2s/payments/initiate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "s2s",
+                "payments",
+                "initiate"
+              ]
+            },
+            "description": "Create a payment order. Authenticates with a `public-key` header (dashboard public key) — this folder overrides the collection's default `api-key` auth.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `amount` | Number `>= 1` | **Required.** |\n| `currency` | String | **Required.** One of NGN, USD, EUR, GBP, KES, TZS, GHS, RWF, XAF, XOF, ZAR, UGX, AUD, CAD, ETB, EGP, MAD, MWK, ZMW, SLL, MUR. |\n| `customer` | Object | **Required.** `email`, `firstName`, `lastName`, `phoneNumber` — all required. |\n| `meta` | Object | **Required.** |\n| `narration` | String | **Required.** |\n| `callbackUrl` | String | Optional. |\n| `deviceId` | String | Optional. |\n| `ip` | String | Optional. |\n| `reference` | String | Optional. Your idempotency key; Reeple generates one if omitted. |\n| `userAgent` | String | Optional. |"
+          },
+          "response": []
+        },
+        {
+          "name": "Create a hosted checkout link",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"NGN\",\n  \"reference\": \"string\",\n  \"narration\": \"string\",\n  \"meta\": {},\n  \"callbackUrl\": \"string\",\n  \"ip\": \"string\",\n  \"deviceId\": \"string\",\n  \"userAgent\": \"string\",\n  \"customer\": {\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"email\": \"string\",\n    \"phoneNumber\": \"string\"\n  },\n  \"amount\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/s2s/payments/checkout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "s2s",
+                "payments",
+                "checkout"
+              ]
+            },
+            "description": "Create a payment order and get a hosted checkout URL — redirect the customer to `checkoutUrl`; Reeple's hosted page handles card entry, OTP, and 3DS. Same request body as **Initiate a payment order**.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `amount` | Number `>= 1` | **Required.** |\n| `currency` | String | **Required.** See currency enum above. |\n| `customer` | Object | **Required.** `email`, `firstName`, `lastName`, `phoneNumber`. |\n| `meta` | Object | **Required.** |\n| `narration` | String | **Required.** |\n| `callbackUrl` | String | Optional. Where to redirect after payment; if omitted, shows a static success/failure screen. |\n| `deviceId` / `ip` / `userAgent` | String | Optional. Forwarded to fraud detection. |\n| `reference` | String | Optional idempotency key. |\n\nResponse includes `checkoutUrl` (e.g. `https://pay.reeple.ai/pay/PSH_7A1B2C3D4E`), `reference`, `amount`, `currency`, `status` (always `pending` at creation)."
+          },
+          "response": []
+        },
+        {
+          "name": "Charge a card (S2S)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardData\": \"3f1a9c2e7b4d0a5f6e8c1b2d:9a3c7e1f2b4d6a8c0e1f3a5b7c9d0e2f:4b2e9f1a3c5d7e9f0a1b2c3d4e5f60718293a4b5c6d7e8f9021324354657687\",\n  \"pin\": \"7c2a4e6f8b1d3a5c7e9f1b3d:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:9f8e7d6c\",\n  \"paymentReference\": \"pay_ref_abc123\",\n  \"requestMetadata\": {\n    \"clientIp\": \"203.0.113.45\",\n    \"userAgent\": \"Mozilla/5.0 ...\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/s2s/payments/charge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "s2s",
+                "payments",
+                "charge"
+              ]
+            },
+            "description": "S2S card charge. `cardData` (and `pin`, NGN-only) must be AES-256-GCM ciphertext (`ivHex:tagHex:cipherHex`) of the card JSON, encrypted client-side using SHA-256(secretKey) as the AES key — see [Charge a card (S2S)](../../api-reference/s2s-payments/charge-card) for the full encryption spec and TypeScript example. **The `cardData`/`pin` values in this example body are illustrative placeholders and must be regenerated with your own secret key before sending — this request will not run as-is.**\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `cardData` | String | **Required.** AES-256-GCM ciphertext of `{ bin, brand, cvv, number, expiry_month, expiry_year }`. |\n| `paymentReference` | String | **Required.** Plain text. |\n| `pin` | String | Optional. Ciphertext of the PIN; NGN payments only. |\n| `requestMetadata` | Object | **Required.** `{ clientIp, userAgent }`. Send `{}` if neither value is available. |\n\n### Other examples\n\nNon-NGN — encrypted card only, no PIN, required metadata:\n\n```json\n{\n  \"cardData\": \"3f1a9c2e7b4d0a5f6e8c1b2d:9a3c7e1f2b4d6a8c0e1f3a5b7c9d0e2f:4b2e9f1a3c5d7e9f0a1b2c3d4e5f6071\",\n  \"paymentReference\": \"pay_ref_def456\",\n  \"requestMetadata\": {\n    \"clientIp\": \"203.0.113.45\",\n    \"userAgent\": \"Mozilla/5.0 ...\"\n  }\n}\n```\n\nMinimal — encrypted card only, no PIN, metadata unavailable:\n\n```json\n{\n  \"cardData\": \"3f1a9c2e7b4d0a5f6e8c1b2d:9a3c7e1f2b4d6a8c0e1f3a5b7c9d0e2f:4b2e9f1a3c5d7e9f0a1b2c3d4e5f6071\",\n  \"paymentReference\": \"pay_ref_ghi789\",\n  \"requestMetadata\": {}\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify a payment order",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/s2s/payments/verify/:reference",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "s2s",
+                "payments",
+                "verify",
+                ":reference"
+              ],
+              "variable": [
+                {
+                  "key": "reference",
+                  "value": "PSH_7A1B2C3D4E",
+                  "description": "The reference of the payment order."
+                }
+              ]
+            },
+            "description": "Verify a payment order by reference.\n\n**Parameters**\n\n| Field | Type | Description |\n|---|---|---|\n| `reference` | String | **Required.** The reference of the payment order (path parameter). |\n\nResponse: `{ success, statusCode, message, data: { status, reference, amount, currency } }`, where `status` is `pending`, `success`, or `failed`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Transactions",
       "item": [
         {

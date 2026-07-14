@@ -1,0 +1,201 @@
+---
+title: Charge a card (S2S)
+description: Encrypt card data with AES-256-GCM and charge it directly through the server-to-server API
+---
+
+For merchants handling raw card data on their own server as part of a fully embedded checkout — see [Choosing a flow](/api-reference/s2s-payments/overview#choosing-a-flow) for how this compares to [Create a hosted checkout link](/api-reference/s2s-payments/create-checkout-link).
+
+Encrypt `cardData` (full card JSON) with AES-256-GCM using your secret key as key material — do not send the secret key itself in headers. Only when the referenced payment's currency is NGN, also encrypt and send `pin`. Then POST `cardData`, optional `pin` (NGN only), plain `paymentReference`, and `requestMetadata`.
+
+## Endpoint
+
+```
+POST https://api-v3.reeple.ai/s2s/payments/charge
+```
+
+## Authentication
+
+Send your dashboard **public key** in a `public-key` header — same key as `ApiKey.publicKey` in the dashboard. See the [S2S Payments overview](/api-reference/s2s-payments/overview#authentication).
+
+## Encrypting card data
+
+### Card data fields
+
+Serialize as UTF-8 JSON (minified or pretty). All values are strings.
+
+| Field | Description |
+|---|---|
+| `bin` | First 6 digits of the PAN (BIN). |
+| `brand` | Card brand (e.g. `visa`, `mastercard`). |
+| `cvv` | Card verification value. |
+| `number` | Full card number. |
+| `expiry_month` | Two-digit month (e.g. `01`–`12`). |
+| `expiry_year` | Two- or four-digit year (e.g. `25` or `2025`). |
+
+Example before encryption:
+
+```json
+{
+  "bin": "506066",
+  "brand": "visa",
+  "cvv": "123",
+  "number": "4111111111111111",
+  "expiry_month": "12",
+  "expiry_year": "25"
+}
+```
+
+Encrypt that JSON string and send the result as `cardData`. Only for NGN payments, encrypt the PIN as a separate UTF-8 string and send as `pin`; omit `pin` entirely for non-NGN payments. `paymentReference` is sent in plain text.
+
+### Key derivation
+
+Must match the server:
+
+1. Take the exact secret key string (UTF-8).
+2. AES-256 key = SHA-256 hash of that string → 32 bytes.
+
+<Warning>
+  Never send your secret key itself in a request or header — only the derived ciphertext.
+</Warning>
+
+### Algorithm
+
+- AES-256-GCM
+- IV: 12 random bytes (a new IV for every encryption)
+- Auth tag: 16 bytes (GCM tag; required for decryption)
+
+### Ciphertext format
+
+Concatenate three hex strings with colons (no spaces):
+
+```
+<ivHex>:<tagHex>:<cipherHex>
+```
+
+- `ivHex`: 24 hex chars (12 bytes)
+- `tagHex`: 32 hex chars (16 bytes)
+- `cipherHex`: variable length
+
+### Example (TypeScript, Node.js `crypto`)
+
+```typescript
+import * as crypto from 'crypto';
+
+const IV_LENGTH = 12;
+
+function deriveKey(secret: string): Buffer {
+  return crypto.createHash('sha256').update(String(secret), 'utf8').digest();
+}
+
+/** Plaintext UTF-8 → `ivHex:tagHex:cipherHex` (AES-256-GCM). */
+function encryptS2S(plainText: string, secretKey: string): string {
+  const key = deriveKey(secretKey);
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const ciphertext = Buffer.concat([
+    cipher.update(plainText, 'utf8'),
+    cipher.final(),
+  ]);
+  const tag = cipher.getAuthTag();
+  return [iv, tag, ciphertext].map((b) => b.toString('hex')).join(':');
+}
+
+const secretKey = 'your-secret-key'; // from dashboard; do NOT send in headers
+
+const cardJson = JSON.stringify({
+  bin: '506066',
+  brand: 'visa',
+  cvv: '123',
+  number: '4111111111111111',
+  expiry_month: '12',
+  expiry_year: '25',
+});
+
+const cardData = encryptS2S(cardJson, secretKey);
+const pin = encryptS2S('1234', secretKey); // NGN only: encrypt the PIN string only
+
+// POST body: { cardData, pin, paymentReference: '...' }
+```
+
+## Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `cardData` | String | **Required.** AES-256-GCM ciphertext (`ivHex:tagHex:cipherHex`) of UTF-8 JSON with fields: `bin`, `brand`, `cvv`, `number`, `expiry_month`, `expiry_year` (all strings). |
+| `paymentReference` | String | **Required.** Plain text. |
+| `pin` | String | Optional. AES-256-GCM ciphertext of the card PIN; send only when the referenced payment is NGN. |
+| `requestMetadata` | Object | **Required.** `{ clientIp, userAgent }` sourced from the cardholder's HTTP request, forwarded for fraud detection and audit. Send `{}` if neither value is available — the charge still proceeds normally. |
+
+## NGN example
+
+Encrypted card + encrypted PIN + required metadata:
+
+```json
+{
+  "cardData": "<ivHex:tagHex:cipherHex — encrypt UTF-8 JSON {\"bin\":\"506066\",\"brand\":\"visa\",\"cvv\":\"123\",\"number\":\"4111111111111111\",\"expiry_month\":\"12\",\"expiry_year\":\"25\"}>",
+  "pin": "<ivHex:tagHex:cipherHex — encrypt UTF-8 PIN>",
+  "paymentReference": "pay_ref_abc123",
+  "requestMetadata": {
+    "clientIp": "203.0.113.45",
+    "userAgent": "Mozilla/5.0 ..."
+  }
+}
+```
+
+## Non-NGN example
+
+Encrypted card only, no PIN, required metadata:
+
+```json
+{
+  "cardData": "<ivHex:tagHex:cipherHex>",
+  "paymentReference": "pay_ref_def456",
+  "requestMetadata": {
+    "clientIp": "203.0.113.45",
+    "userAgent": "Mozilla/5.0 ..."
+  }
+}
+```
+
+## Minimal example
+
+Encrypted card only, no PIN, metadata unavailable:
+
+```json
+{
+  "cardData": "<ivHex:tagHex:cipherHex>",
+  "paymentReference": "pay_ref_ghi789",
+  "requestMetadata": {}
+}
+```
+
+## Response
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Charge successful",
+  "data": {
+    "status": "success",
+    "reference": "a1b2c3d4e5f6g7h8",
+    "amount": 2500,
+    "fee": 125,
+    "currency": "NGN",
+    "message": "Charge successful"
+  }
+}
+```
+
+<Note>
+  A `400` on this endpoint specifically means the charge failed (the provider declined it or the encrypted payload couldn't be decrypted) — distinct from the generic "bad request" meaning elsewhere in this API.
+</Note>
+
+<Tip>
+  See [Errors](/api-reference/errors) for the shape of `401`/`500` responses.
+</Tip>
+
+## Next steps
+
+- [Verify a payment order](/api-reference/s2s-payments/verify-payment) to confirm the final status.
+- [Webhooks](/api-reference/webhooks) fires `charge.success`/`charge.failed` events as the charge resolves.

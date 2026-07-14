@@ -71,6 +71,10 @@ app.get('/payment/callback', async (req, res) => {
 
 The verify endpoint responds with `{ success, statusCode, message, data: { status, reference, amount, currency } }`, where `data.status` is one of `pending`, `success`, or `failed`. It returns `400` if the order isn't found, `401` for an invalid/missing key, and `500` on an internal error.
 
+<Tip>
+  See [Verify a payment order](/api-reference/s2s-payments/verify-payment) for the full endpoint reference, including error responses.
+</Tip>
+
 ## Session timeout
 
 If the checkout session isn't completed within **10 minutes**, `onError` fires and the session expires.
